@@ -124,6 +124,7 @@ public static class Texture2DExtension
         texture.Apply();
     }
 
+    // Bresenham's line algorithm
     public static void DrawLine(this Texture2D texture, Vector2Int p0, Vector2Int p1, Color color)
     {
         int dx = Mathf.Abs(p1.x - p0.x);
@@ -158,5 +159,4 @@ public static class Texture2DExtension
         texture.SetPixel(p0.x, p0.y, color);
         texture.Apply();
     }
-
 }
