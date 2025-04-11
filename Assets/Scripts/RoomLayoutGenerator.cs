@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class RoomLayoutGenerator : MonoBehaviour
 {
+    // These should be powers of 2, otherwise behavior may be undefined.
     [SerializeField] int levelWidth = 64;
     [SerializeField] int levelLength = 64;
 
-    // TODO: Use Unity's built-in Range attribute?
     [SerializeField] int roomWidthMin = 3;
     [SerializeField] int roomWidthMax = 5;
     [SerializeField] int roomLengthMin = 3;
