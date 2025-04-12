@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,12 +22,14 @@ public class RoomLayoutGenerator : MonoBehaviour
 
     // Use System.Random instead of Unity's Random to avoid potential overrides from 3rd party sources that change the behavior.
     System.Random random;
+    Level level;
 
     [ContextMenu("Generate Level Layout")]
     public void GenerateLevel()
     {
         random = new System.Random();
         openDoorways = new List<Hallway>();
+        level = new Level(levelWidth, levelLength);
 
         var roomRect = GetStartRoomRect();
         Debug.Log(roomRect);
@@ -41,6 +44,17 @@ public class RoomLayoutGenerator : MonoBehaviour
             // Add the possible hallway to the list of open doorways.
             openDoorways.Add(h);
         }
+
+        // TODO: Test Code. Remove Later.
+        Room testRoom1 = new Room(new RectInt(3, 6, 6, 10));
+        Room testRoom2 = new Room(new RectInt(15, 4, 10, 12));
+        Hallway testHallway1 = new Hallway(new Vector2Int(6, 3), HallwayDirection.Right, testRoom1);
+        testHallway1.EndPosition = new Vector2Int(0, 5);
+        testHallway1.EndRoom = testRoom2;
+        level.AddRoom(testRoom1);
+        level.AddRoom(testRoom2);
+        level.AddHallway(testHallway1);
+        // End Test Code
 
         DrawLayout(roomRect);
     }
@@ -84,6 +98,10 @@ public class RoomLayoutGenerator : MonoBehaviour
         // Fill the whole texture black and then just fill our new room cyan.
         // TODO: This will likely need to change once we start adding more rooms.
         layoutTexture.FillWithColor(Color.black);
+
+        Array.ForEach(level.Rooms, room => layoutTexture.DrawRectangle(room.Area, Color.white));
+        Array.ForEach(level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
+
         layoutTexture.DrawRectangle(roomCandidateRect, Color.white);
 
         // Mark open doorways with a red pixel.

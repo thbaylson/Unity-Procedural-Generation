@@ -7,6 +7,9 @@ public class Level
     public int Width { get; private set; }
     public int Length { get; private set; }
 
+    public Room[] Rooms => rooms.ToArray();
+    public Hallway[] Hallways => hallways.ToArray();
+
     List<Room> rooms;
     List<Hallway> hallways;
 
@@ -18,4 +21,7 @@ public class Level
         rooms = new List<Room>();
         hallways = new List<Hallway>();
     }
+
+    public void AddRoom(Room newRoom) => rooms.Add(newRoom);
+    public void AddHallway(Hallway newHallway) => hallways.Add(newHallway);
 }
