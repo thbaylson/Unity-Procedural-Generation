@@ -18,4 +18,18 @@ public static class  HallwayDirectionExtension
     {
         return DirectionToColorMap.TryGetValue(direction, out Color color) ? color : Color.red;
     }
+
+    public static HallwayDirection GetOppositeDirection(this HallwayDirection direction)
+    {
+        // Copilot suggested a switch-case instead. I think I liked that implementation better than this one.
+        Dictionary<HallwayDirection, HallwayDirection> oppositeDirectionMap = new Dictionary<HallwayDirection, HallwayDirection>
+        {
+            { HallwayDirection.Top, HallwayDirection.Bottom },
+            { HallwayDirection.Left, HallwayDirection.Right },
+            { HallwayDirection.Bottom, HallwayDirection.Top },
+            { HallwayDirection.Right, HallwayDirection.Left }
+        };
+
+        return oppositeDirectionMap.TryGetValue(direction, out HallwayDirection oppositeDirection) ? oppositeDirection : HallwayDirection.Undefined;
+    }
 }

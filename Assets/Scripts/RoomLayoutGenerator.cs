@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RoomLayoutGenerator : MonoBehaviour
@@ -32,7 +33,7 @@ public class RoomLayoutGenerator : MonoBehaviour
         level = new Level(levelWidth, levelLength);
 
         var roomRect = GetStartRoomRect();
-        Debug.Log(roomRect);
+        //Debug.Log(roomRect);
 
         Room startRoom = new Room(roomRect);
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
@@ -46,17 +47,11 @@ public class RoomLayoutGenerator : MonoBehaviour
         }
 
         // TODO: Test Code. Remove Later.
-        Room testRoom1 = new Room(new RectInt(3, 6, 6, 10));
-        Room testRoom2 = new Room(new RectInt(15, 4, 10, 12));
-        Hallway testHallway1 = new Hallway(new Vector2Int(6, 3), HallwayDirection.Right, testRoom1);
-        testHallway1.EndPosition = new Vector2Int(0, 5);
-        testHallway1.EndRoom = testRoom2;
-        level.AddRoom(testRoom1);
-        level.AddRoom(testRoom2);
-        level.AddHallway(testHallway1);
+        Hallway selectedEntryway = openDoorways[random.Next(openDoorways.Count)];
+        Hallway selectedExit = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), selectedEntryway);
         // End Test Code
 
-        DrawLayout(roomRect);
+        DrawLayout(selectedEntryway, roomRect);
     }
 
     /// <summary>
@@ -84,7 +79,7 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// Draw the level layout to the texture. This will be used to display the level layout in the editor.
     /// </summary>
     /// <param name="roomCandidateRect">The rectangle that will be drawn in the level layout.</param>
-    void DrawLayout(RectInt roomCandidateRect= new RectInt())
+    private void DrawLayout(Hallway selectedEntryway= null, RectInt roomCandidateRect= new RectInt())
     {
         var renderer = levelLayoutDisplay.GetComponent<Renderer>();
 
@@ -104,9 +99,20 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         layoutTexture.DrawRectangle(roomCandidateRect, Color.white);
 
-        // Mark open doorways with a red pixel.
+        // Mark open doorways with a differently colored pixel. The color is determine by the direction of the hallway.
         openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, h.StartDirection.GetColor()));
 
+        // TODO: This is a temporary solution to show the selected entryway. Remove later.
+        layoutTexture.SetPixel(selectedEntryway.StartPositionAbsolute.x, selectedEntryway.StartPositionAbsolute.y, Color.grey);
         layoutTexture.SaveAsset();
+    }
+
+    private Hallway SelectHallwayCandidate(RectInt roomCandidate, Hallway entryway)
+    {
+        Room room = new Room(roomCandidate);
+        List<Hallway> hallwayCandidates = room.CalcAllPossibleDoorways(roomCandidate.width, roomCandidate.height, doorwayDistanceFromCorner);
+        HallwayDirection requiredDirection = entryway.StartDirection.GetOppositeDirection();
+        List<Hallway> filteredHallwayCandidates = hallwayCandidates.Where(h => h.StartDirection == requiredDirection).ToList();
+        return filteredHallwayCandidates.Count > 0 ? filteredHallwayCandidates[random.Next(filteredHallwayCandidates.Count)] : null;
     }
 }
