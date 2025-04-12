@@ -27,9 +27,9 @@ public class Room
         for(int x = minX; x < maxX; x++)
         {
             // Top, aka north wall
-            hallwayCandidates.Add(new Hallway(new Vector2Int(x, height - 1)));
+            hallwayCandidates.Add(new Hallway(new Vector2Int(x, height - 1), HallwayDirection.Top));
             // Bottom, aka south wall
-            hallwayCandidates.Add(new Hallway(new Vector2Int(x, 0)));
+            hallwayCandidates.Add(new Hallway(new Vector2Int(x, 0), HallwayDirection.Bottom));
         }
 
         int minY = minDistFromCorner;
@@ -37,9 +37,9 @@ public class Room
         for (int y = minY; y < maxY; y++)
         {
             // Left, aka west wall
-            hallwayCandidates.Add(new Hallway(new Vector2Int(0, y)));
+            hallwayCandidates.Add(new Hallway(new Vector2Int(0, y), HallwayDirection.Left));
             // Right, aka east wall
-            hallwayCandidates.Add(new Hallway(new Vector2Int(width - 1, y)));
+            hallwayCandidates.Add(new Hallway(new Vector2Int(width - 1, y), HallwayDirection.Right));
         }
 
         return hallwayCandidates;

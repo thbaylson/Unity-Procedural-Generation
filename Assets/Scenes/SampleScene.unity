@@ -561,11 +561,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelWidth: 64
   levelLength: 64
-  roomWidthMin: 10
+  roomWidthMin: 5
   roomWidthMax: 15
-  roomLengthMin: 10
+  roomLengthMin: 5
   roomLengthMax: 15
-  doorwayDistanceFromCorner: 3
+  doorwayDistanceFromCorner: 2
   levelLayoutDisplay: {fileID: 92743441}
 --- !u!4 &928695907
 Transform:

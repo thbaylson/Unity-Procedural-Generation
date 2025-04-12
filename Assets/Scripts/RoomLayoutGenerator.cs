@@ -84,10 +84,10 @@ public class RoomLayoutGenerator : MonoBehaviour
         // Fill the whole texture black and then just fill our new room cyan.
         // TODO: This will likely need to change once we start adding more rooms.
         layoutTexture.FillWithColor(Color.black);
-        layoutTexture.DrawRectangle(roomCandidateRect, Color.cyan);
+        layoutTexture.DrawRectangle(roomCandidateRect, Color.white);
 
         // Mark open doorways with a red pixel.
-        openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, Color.red));
+        openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, h.StartDirection.GetColor()));
 
         layoutTexture.SaveAsset();
     }
