@@ -1,17 +1,23 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RoomLayoutGenerator : MonoBehaviour
 {
+    [Header("Level Layout Settings")]
     // These should be powers of 2, otherwise behavior may be undefined.
     [SerializeField] int levelWidth = 64;
     [SerializeField] int levelLength = 64;
 
+    [Header("Room Settings")]
     [SerializeField] int roomWidthMin = 3;
     [SerializeField] int roomWidthMax = 5;
     [SerializeField] int roomLengthMin = 3;
     [SerializeField] int roomLengthMax = 5;
+    [SerializeField] int doorwayDistanceFromCorner = 1;
 
+    [Header("Level Layout Display")]
     [SerializeField] GameObject levelLayoutDisplay;
+    [SerializeField] List<Hallway> openDoorways;
 
     // Use System.Random instead of Unity's Random to avoid potential overrides from 3rd party sources that change the behavior.
     System.Random random;
@@ -20,9 +26,22 @@ public class RoomLayoutGenerator : MonoBehaviour
     public void GenerateLevel()
     {
         random = new System.Random();
+        openDoorways = new List<Hallway>();
 
         var roomRect = GetStartRoomRect();
         Debug.Log(roomRect);
+
+        Room startRoom = new Room(roomRect);
+        // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
+        List<Hallway> hallways = startRoom.CalcAllPossibleDoorways(startRoom.Area.width, startRoom.Area.height, doorwayDistanceFromCorner);
+        foreach(Hallway h in hallways)
+        {
+            // Set the start room for each possible hallway to the level's start room.
+            h.StartRoom = startRoom;
+            // Add the possible hallway to the list of open doorways.
+            openDoorways.Add(h);
+        }
+
         DrawLayout(roomRect);
     }
 
@@ -66,6 +85,10 @@ public class RoomLayoutGenerator : MonoBehaviour
         // TODO: This will likely need to change once we start adding more rooms.
         layoutTexture.FillWithColor(Color.black);
         layoutTexture.DrawRectangle(roomCandidateRect, Color.cyan);
+
+        // Mark open doorways with a red pixel.
+        openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, Color.red));
+
         layoutTexture.SaveAsset();
     }
 }
