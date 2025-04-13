@@ -6,9 +6,11 @@ using UnityEngine;
 public class RoomLayoutGenerator : MonoBehaviour
 {
     [Header("Level Layout Settings")]
-    // These should be powers of 2, otherwise behavior may be undefined.
+    // Width and length should be powers of 2, otherwise behavior may be undefined.
     [SerializeField] int levelWidth = 64;
     [SerializeField] int levelLength = 64;
+    [SerializeField] int roomCountMin = 3;
+    [SerializeField] int roomCountMax = 5;
 
     [Header("Room Settings")]
     [SerializeField] int roomWidthMin = 3;
@@ -16,6 +18,10 @@ public class RoomLayoutGenerator : MonoBehaviour
     [SerializeField] int roomLengthMin = 3;
     [SerializeField] int roomLengthMax = 5;
     [SerializeField] int doorwayDistanceFromCorner = 1;
+
+    [Header("Hallway Settings")]
+    [SerializeField] int hallwayWidthMin = 2;
+    [SerializeField] int hallwayWidthMax = 3;
 
     [Header("Level Layout Display")]
     [SerializeField] GameObject levelLayoutDisplay;
@@ -29,16 +35,17 @@ public class RoomLayoutGenerator : MonoBehaviour
     public void GenerateLevel()
     {
         random = new System.Random();
-        openDoorways = new List<Hallway>();
         level = new Level(levelWidth, levelLength);
+        openDoorways = new List<Hallway>();
 
         var roomRect = GetStartRoomRect();
         //Debug.Log("Start Room: "+roomRect);
 
         Room startRoom = new Room(roomRect);
+        level.AddRoom(startRoom);
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
         List<Hallway> hallways = startRoom.CalcAllPossibleDoorways(startRoom.Area.width, startRoom.Area.height, doorwayDistanceFromCorner);
-        foreach(Hallway h in hallways)
+        foreach (Hallway h in hallways)
         {
             // Set the start room for each possible hallway to the level's start room.
             h.StartRoom = startRoom;
@@ -46,23 +53,10 @@ public class RoomLayoutGenerator : MonoBehaviour
             openDoorways.Add(h);
         }
 
-        // TODO: Test Code. Remove Later.
-        Hallway currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
-        // We're creating the hallway for the 5 x 7 Room before we create the room itself. The order of operations seems backwards.
-        //  I think we're doing it this way so that hallways are always straight. The room's position is based off of the hallway,
-        //  instead of the other way around. But, if hallways are always straight, that'll look boring after a while.
-        Hallway nextRoomEntrance = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), currentRoomExit);
-        
-        Vector2Int roomCandidatePosition = CalcNextRoomPosition(5, 7, 2, currentRoomExit, nextRoomEntrance.StartPosition);
-        Room secondRoom = new Room(new RectInt(roomCandidatePosition.x, roomCandidatePosition.y, 5, 7));
-        currentRoomExit.EndRoom = secondRoom;
-        currentRoomExit.EndPosition = nextRoomEntrance.StartPosition;
-        
-        level.AddRoom(secondRoom);
-        level.AddHallway(currentRoomExit);
-        // End Test Code
+        //Hallway currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
+        AddRooms();
 
-        DrawLayout(currentRoomExit, roomRect);
+        DrawLayout();
     }
 
     /// <summary>
@@ -71,14 +65,14 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// <returns>A rectangle that is in the center of the level.</returns>
     private RectInt GetStartRoomRect()
     {
-        int roomWidth = random.Next(roomWidthMin, roomWidthMax);
+        int roomWidth = random.Next(roomWidthMin, roomWidthMax + 1);
         // Imagine folding a piece of paper in half and cutting off the randomly chosen room width.
         //  When we add back a quarter of the level width later, we will have an x-coord in the middle two quarters of the level.
         int availableWidthX = levelWidth / 2 - roomWidth;
         int randomX = random.Next(0, availableWidthX);
         int roomX = randomX + (levelWidth / 4);
 
-        int roomLength = random.Next(roomLengthMin, roomLengthMax);
+        int roomLength = random.Next(roomLengthMin, roomLengthMax + 1);
         int availableLengthY = levelLength / 2 - roomLength;
         int randomY = random.Next(0, availableLengthY);
         int roomY = randomY + (levelLength / 4);
@@ -90,7 +84,7 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// Draw the level layout to the texture. This will be used to display the level layout in the editor.
     /// </summary>
     /// <param name="roomCandidateRect">The rectangle that will be drawn in the level layout.</param>
-    private void DrawLayout(Hallway selectedEntryway= null, RectInt roomCandidateRect= new RectInt())
+    private void DrawLayout()
     {
         var renderer = levelLayoutDisplay.GetComponent<Renderer>();
 
@@ -108,13 +102,13 @@ public class RoomLayoutGenerator : MonoBehaviour
         Array.ForEach(level.Rooms, room => layoutTexture.DrawRectangle(room.Area, Color.white));
         Array.ForEach(level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
 
-        layoutTexture.DrawRectangle(roomCandidateRect, Color.white);
+        //layoutTexture.DrawRectangle(roomCandidateRect, Color.white);
 
         // Mark open doorways with a differently colored pixel. The color is determine by the direction of the hallway.
         openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, h.StartDirection.GetColor()));
 
         // TODO: This is a temporary solution to show the selected entryway. Remove later.
-        layoutTexture.SetPixel(selectedEntryway.StartPositionAbsolute.x, selectedEntryway.StartPositionAbsolute.y, Color.grey);
+        //layoutTexture.SetPixel(selectedEntryway.StartPositionAbsolute.x, selectedEntryway.StartPositionAbsolute.y, Color.grey);
         layoutTexture.SaveAsset();
     }
 
@@ -172,4 +166,58 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         return roomPosition;
     }
+
+    private Room ConstructNextRoom(Hallway currentRoomExit)
+    {
+        RectInt roomCandidateRect = new RectInt {
+            width = random.Next(roomWidthMin, roomWidthMax + 1),
+            height = random.Next(roomLengthMin, roomLengthMax + 1)
+        };
+
+        // We're creating the hallway for the 5 x 7 Room before we create the room itself. The order of operations seems backwards.
+        //  I think we're doing it this way so that hallways are always straight. The room's position is based off of the hallway,
+        //  instead of the other way around. But, if hallways are always straight, that'll look boring after a while.
+        Hallway nextRoomEntrance = SelectHallwayCandidate(roomCandidateRect, currentRoomExit);
+        if (nextRoomEntrance == null) return null;
+
+        Vector2Int roomCandidatePosition = CalcNextRoomPosition(
+            roomCandidateRect.width,
+            roomCandidateRect.height,
+            random.Next(hallwayWidthMin, hallwayWidthMax + 1),
+            currentRoomExit,
+            nextRoomEntrance.StartPosition
+        );
+
+        roomCandidateRect.position = roomCandidatePosition;
+        Room nextRoom = new Room(roomCandidateRect);
+        currentRoomExit.EndRoom = nextRoom;
+        currentRoomExit.EndPosition = nextRoomEntrance.StartPosition;
+        
+        return nextRoom;
+    }
+
+    private void AddRooms()
+    {
+        int roomCount = random.Next(roomCountMin, roomCountMax + 1);
+        Debug.Log("Room Count: " + roomCount);
+
+        Hallway currentRoomExit;
+        while (level.Rooms.Count() < roomCount)
+        {
+            currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
+            Room newRoom = ConstructNextRoom(currentRoomExit);
+
+            level.AddRoom(newRoom);
+            level.AddHallway(currentRoomExit);
+            openDoorways.Remove(currentRoomExit);
+
+            // Get all new doorways
+            List<Hallway> newDoorways = newRoom.CalcAllPossibleDoorways(newRoom.Area.width, newRoom.Area.height, doorwayDistanceFromCorner);
+            // TODO: This should probably happen in CalcAllPossibleDoorways
+            newDoorways.ForEach(h => h.StartRoom = newRoom);
+            // Add all new doorways that do not point in the direction we just came from
+            openDoorways.AddRange(newDoorways.Where(h => h.StartDirection != currentRoomExit.StartDirection));
+        }
+    }
+
 }
