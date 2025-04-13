@@ -174,7 +174,7 @@ public class RoomLayoutGenerator : MonoBehaviour
             height = random.Next(roomLengthMin, roomLengthMax + 1)
         };
 
-        // We're creating the hallway for the 5 x 7 Room before we create the room itself. The order of operations seems backwards.
+        // We're creating the hallway for the next Room before we create the room itself. The order of operations seems backwards.
         //  I think we're doing it this way so that hallways are always straight. The room's position is based off of the hallway,
         //  instead of the other way around. But, if hallways are always straight, that'll look boring after a while.
         Hallway nextRoomEntrance = SelectHallwayCandidate(roomCandidateRect, currentRoomExit);
@@ -199,24 +199,31 @@ public class RoomLayoutGenerator : MonoBehaviour
     private void AddRooms()
     {
         int roomCount = random.Next(roomCountMin, roomCountMax + 1);
-        Debug.Log("Room Count: " + roomCount);
 
         Hallway currentRoomExit;
-        while (level.Rooms.Count() < roomCount)
+        while (openDoorways.Count > 0 && level.Rooms.Length < roomCount)
         {
             currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
             Room newRoom = ConstructNextRoom(currentRoomExit);
 
+            if(newRoom == null)
+            {
+                // If newRoom failed to be created, we need to remove that hallway from the list of open doorways.
+                openDoorways.Remove(currentRoomExit);
+                continue;
+            }
+
             level.AddRoom(newRoom);
             level.AddHallway(currentRoomExit);
             openDoorways.Remove(currentRoomExit);
+            currentRoomExit.EndRoom = newRoom;
 
             // Get all new doorways
             List<Hallway> newDoorways = newRoom.CalcAllPossibleDoorways(newRoom.Area.width, newRoom.Area.height, doorwayDistanceFromCorner);
             // TODO: This should probably happen in CalcAllPossibleDoorways
             newDoorways.ForEach(h => h.StartRoom = newRoom);
             // Add all new doorways that do not point in the direction we just came from
-            openDoorways.AddRange(newDoorways.Where(h => h.StartDirection != currentRoomExit.StartDirection));
+            openDoorways.AddRange(newDoorways.Where(h => h.StartDirection != currentRoomExit.StartDirection.GetOppositeDirection()));
         }
     }
 
