@@ -562,9 +562,9 @@ MonoBehaviour:
   levelWidth: 64
   levelLength: 64
   roomWidthMin: 5
-  roomWidthMax: 15
+  roomWidthMax: 11
   roomLengthMin: 5
-  roomLengthMax: 15
+  roomLengthMax: 11
   doorwayDistanceFromCorner: 2
   levelLayoutDisplay: {fileID: 92743441}
 --- !u!4 &928695907

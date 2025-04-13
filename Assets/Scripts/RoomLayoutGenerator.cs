@@ -33,7 +33,7 @@ public class RoomLayoutGenerator : MonoBehaviour
         level = new Level(levelWidth, levelLength);
 
         var roomRect = GetStartRoomRect();
-        //Debug.Log(roomRect);
+        //Debug.Log("Start Room: "+roomRect);
 
         Room startRoom = new Room(roomRect);
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
@@ -47,11 +47,22 @@ public class RoomLayoutGenerator : MonoBehaviour
         }
 
         // TODO: Test Code. Remove Later.
-        Hallway selectedEntryway = openDoorways[random.Next(openDoorways.Count)];
-        Hallway selectedExit = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), selectedEntryway);
+        Hallway currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
+        // We're creating the hallway for the 5 x 7 Room before we create the room itself. The order of operations seems backwards.
+        //  I think we're doing it this way so that hallways are always straight. The room's position is based off of the hallway,
+        //  instead of the other way around. But, if hallways are always straight, that'll look boring after a while.
+        Hallway nextRoomEntrance = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), currentRoomExit);
+        
+        Vector2Int roomCandidatePosition = CalcNextRoomPosition(5, 7, 2, currentRoomExit, nextRoomEntrance.StartPosition);
+        Room secondRoom = new Room(new RectInt(roomCandidatePosition.x, roomCandidatePosition.y, 5, 7));
+        currentRoomExit.EndRoom = secondRoom;
+        currentRoomExit.EndPosition = nextRoomEntrance.StartPosition;
+        
+        level.AddRoom(secondRoom);
+        level.AddHallway(currentRoomExit);
         // End Test Code
 
-        DrawLayout(selectedEntryway, roomRect);
+        DrawLayout(currentRoomExit, roomRect);
     }
 
     /// <summary>
@@ -107,12 +118,58 @@ public class RoomLayoutGenerator : MonoBehaviour
         layoutTexture.SaveAsset();
     }
 
-    private Hallway SelectHallwayCandidate(RectInt roomCandidate, Hallway entryway)
+    /// <summary>
+    /// Select a random hallway from the list of possible doorways. The selected hallway is the next room's entrance.
+    /// </summary>
+    /// <param name="roomCandidate">The rectangle that is used to create the next room.</param>
+    /// <param name="currentRoomExit">The current room's exit. This is used to determine the direction of the next room's entrance.</param>
+    /// <returns>A hallway with a relative starting position to the roomCandidate. The start direction will point towards currentRoomExit.</returns>
+    private Hallway SelectHallwayCandidate(RectInt roomCandidate, Hallway currentRoomExit)
     {
-        Room room = new Room(roomCandidate);
-        List<Hallway> hallwayCandidates = room.CalcAllPossibleDoorways(roomCandidate.width, roomCandidate.height, doorwayDistanceFromCorner);
-        HallwayDirection requiredDirection = entryway.StartDirection.GetOppositeDirection();
+        // We're currently assuming that we'll always have space for the next room. That'll have to change
+        //  or else we'll eventually run out of bounds.
+        Room nextRoom = new Room(roomCandidate);
+        
+        List<Hallway> hallwayCandidates = nextRoom.CalcAllPossibleDoorways(roomCandidate.width, roomCandidate.height, doorwayDistanceFromCorner);
+        HallwayDirection requiredDirection = currentRoomExit.StartDirection.GetOppositeDirection();
         List<Hallway> filteredHallwayCandidates = hallwayCandidates.Where(h => h.StartDirection == requiredDirection).ToList();
+        
         return filteredHallwayCandidates.Count > 0 ? filteredHallwayCandidates[random.Next(filteredHallwayCandidates.Count)] : null;
+    }
+
+    /// <summary>
+    /// Calculates the next room's position based on the current room's exit and the next room's entrance.
+    /// </summary>
+    /// <param name="roomWidth">The width of the next room.</param>
+    /// <param name="roomHeight">The height of the next room.</param>
+    /// <param name="distance">The distance between the current room's exit and the next room's entrance.</param>
+    /// <param name="currentRoomExit">The current room's exit. This is used to determine the position and direction of the next room's entrance.</param>
+    /// <param name="nextRoomEntrancePosition">The next room's entrance position. This is used to determine the position of the next room.</param>
+    /// <returns>The position of the next room.</returns>
+    private Vector2Int CalcNextRoomPosition(int roomWidth, int roomHeight, int distance, Hallway currentRoomExit, Vector2Int nextRoomEntrancePosition)
+    {
+        // A Room's position is the bottom left corner of the room.
+        Vector2Int roomPosition = currentRoomExit.StartPositionAbsolute;
+        switch (currentRoomExit.StartDirection)
+        {
+            case HallwayDirection.Top:
+                roomPosition.x -= nextRoomEntrancePosition.x;
+                roomPosition.y += distance + 1;
+                break;
+            case HallwayDirection.Right:
+                roomPosition.x += distance + 1;
+                roomPosition.y -= nextRoomEntrancePosition.y;
+                break;
+            case HallwayDirection.Bottom:
+                roomPosition.x -= nextRoomEntrancePosition.x;
+                roomPosition.y -= distance + roomHeight;
+                break;
+            case HallwayDirection.Left:
+                roomPosition.x -= distance + roomWidth;
+                roomPosition.y -= nextRoomEntrancePosition.y;
+                break;
+        }
+
+        return roomPosition;
     }
 }
