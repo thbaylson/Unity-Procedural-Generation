@@ -9,6 +9,8 @@ public class RoomLayoutGenerator : MonoBehaviour
     // Width and length should be powers of 2, otherwise behavior may be undefined.
     [SerializeField] int levelWidth = 64;
     [SerializeField] int levelLength = 64;
+    [SerializeField] int levelPadding = 1;
+    [SerializeField] int roomMargin = 1;
     [SerializeField] int roomCountMin = 3;
     [SerializeField] int roomCountMax = 5;
 
@@ -76,7 +78,7 @@ public class RoomLayoutGenerator : MonoBehaviour
         int availableLengthY = levelLength / 2 - roomLength;
         int randomY = random.Next(0, availableLengthY);
         int roomY = randomY + (levelLength / 4);
-        
+
         return new RectInt(roomX, roomY, roomWidth, roomLength);
     }
 
@@ -123,11 +125,11 @@ public class RoomLayoutGenerator : MonoBehaviour
         // We're currently assuming that we'll always have space for the next room. That'll have to change
         //  or else we'll eventually run out of bounds.
         Room nextRoom = new Room(roomCandidate);
-        
+
         List<Hallway> hallwayCandidates = nextRoom.CalcAllPossibleDoorways(roomCandidate.width, roomCandidate.height, doorwayDistanceFromCorner);
         HallwayDirection requiredDirection = currentRoomExit.StartDirection.GetOppositeDirection();
         List<Hallway> filteredHallwayCandidates = hallwayCandidates.Where(h => h.StartDirection == requiredDirection).ToList();
-        
+
         return filteredHallwayCandidates.Count > 0 ? filteredHallwayCandidates[random.Next(filteredHallwayCandidates.Count)] : null;
     }
 
@@ -187,12 +189,14 @@ public class RoomLayoutGenerator : MonoBehaviour
             currentRoomExit,
             nextRoomEntrance.StartPosition
         );
-
         roomCandidateRect.position = roomCandidatePosition;
+
+        if (!IsRoomCandidateValid(roomCandidateRect)) return null;
+
         Room nextRoom = new Room(roomCandidateRect);
         currentRoomExit.EndRoom = nextRoom;
         currentRoomExit.EndPosition = nextRoomEntrance.StartPosition;
-        
+
         return nextRoom;
     }
 
@@ -206,17 +210,18 @@ public class RoomLayoutGenerator : MonoBehaviour
             currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
             Room newRoom = ConstructNextRoom(currentRoomExit);
 
-            if(newRoom == null)
+            if (newRoom == null)
             {
                 // If newRoom failed to be created, we need to remove that hallway from the list of open doorways.
+                // TODO: Maybe the room failed to construct bc it was slightly too big. Could we try smaller sizes before we remove the doorway?
                 openDoorways.Remove(currentRoomExit);
                 continue;
             }
 
             level.AddRoom(newRoom);
+            currentRoomExit.EndRoom = newRoom;
             level.AddHallway(currentRoomExit);
             openDoorways.Remove(currentRoomExit);
-            currentRoomExit.EndRoom = newRoom;
 
             // Get all new doorways
             List<Hallway> newDoorways = newRoom.CalcAllPossibleDoorways(newRoom.Area.width, newRoom.Area.height, doorwayDistanceFromCorner);
@@ -225,6 +230,49 @@ public class RoomLayoutGenerator : MonoBehaviour
             // Add all new doorways that do not point in the direction we just came from
             openDoorways.AddRange(newDoorways.Where(h => h.StartDirection != currentRoomExit.StartDirection.GetOppositeDirection()));
         }
+    }
+
+    private bool IsRoomCandidateValid(RectInt roomCandidateRect)
+    {
+        RectInt levelRect = new RectInt
+        {
+            xMin = levelPadding,
+            yMin = levelPadding,
+            width = levelWidth - (2 * levelPadding),// multiply by 2 to account for left and right sides
+            height = levelLength - (2 * levelPadding)// multiply by 2 to account for top and bottom sides
+        };
+
+        return levelRect.Contains(roomCandidateRect) && !CheckRoomOverlap(roomCandidateRect, level.Rooms, level.Hallways, roomMargin);
+    }
+
+    // TODO: Could this be used to check hallway overlap?
+    private bool CheckRoomOverlap(RectInt roomCandidateRect, Room[] rooms, Hallway[] hallways, int minRoomDistance)
+    {
+        RectInt paddedRoomRect = new RectInt
+        {
+            x = roomCandidateRect.x - minRoomDistance,
+            y = roomCandidateRect.y - minRoomDistance,
+            width = roomCandidateRect.width + (2 * minRoomDistance),
+            height = roomCandidateRect.height + (2 * minRoomDistance)
+        };
+
+        foreach (Room room in rooms)
+        {
+            if (paddedRoomRect.Overlaps(room.Area))
+            {
+                return true;
+            }
+        }
+
+        foreach (Hallway hallway in hallways)
+        {
+            if (paddedRoomRect.Overlaps(hallway.Area))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
