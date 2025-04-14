@@ -559,19 +559,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a98d79a0c314674ca2ee5851935d398, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelWidth: 64
-  levelLength: 64
-  levelPadding: 1
-  roomCountMin: 20
-  roomCountMax: 20
-  roomWidthMin: 5
-  roomWidthMax: 15
-  roomLengthMin: 5
-  roomLengthMax: 15
-  doorwayDistanceFromCorner: 1
-  hallwayWidthMin: 5
-  hallwayWidthMax: 5
+  seed: 276983562
+  levelConfig: {fileID: 11400000, guid: 388bd2729ce87d444bc7d81a5f52d1e7, type: 2}
   levelLayoutDisplay: {fileID: 92743441}
+  _enableDebuggingInfo: 0
 --- !u!4 &928695907
 Transform:
   m_ObjectHideFlags: 0
