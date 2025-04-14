@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Random = System.Random;
 using UnityEngine;
 
 public class RoomLayoutGenerator : MonoBehaviour
 {
     [Header("Level Layout Settings")]
+    [SerializeField] int seed = Environment.TickCount;
+
     // Width and length should be powers of 2, otherwise behavior may be undefined.
     [SerializeField] int levelWidth = 64;
     [SerializeField] int levelLength = 64;
@@ -28,21 +31,27 @@ public class RoomLayoutGenerator : MonoBehaviour
     [Header("Level Layout Display")]
     [SerializeField] GameObject levelLayoutDisplay;
     [SerializeField] List<Hallway> openDoorways;
+    [SerializeField] bool _enableDebuggingInfo = false;
 
     // Use System.Random instead of Unity's Random to avoid potential overrides from 3rd party sources that change the behavior.
-    System.Random random;
+    Random random;
     Level level;
+
+
+    [ContextMenu("Generate New Seed")]
+    public void GenerateNewSeed()
+    {
+        seed = Environment.TickCount;
+    }
 
     [ContextMenu("Generate Level Layout")]
     public void GenerateLevel()
     {
-        random = new System.Random();
+        random = new Random(seed);
         level = new Level(levelWidth, levelLength);
         openDoorways = new List<Hallway>();
 
         var roomRect = GetStartRoomRect();
-        //Debug.Log("Start Room: "+roomRect);
-
         Room startRoom = new Room(roomRect);
         level.AddRoom(startRoom);
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
@@ -55,10 +64,16 @@ public class RoomLayoutGenerator : MonoBehaviour
             openDoorways.Add(h);
         }
 
-        //Hallway currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
         AddRooms();
 
         DrawLayout();
+    }
+
+    [ContextMenu("Generate New Seed And New Level")]
+    public void GenerateNewSeedAndNewLevel()
+    {
+        GenerateNewSeed();
+        GenerateLevel();
     }
 
     /// <summary>
@@ -104,13 +119,12 @@ public class RoomLayoutGenerator : MonoBehaviour
         Array.ForEach(level.Rooms, room => layoutTexture.DrawRectangle(room.Area, Color.white));
         Array.ForEach(level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
 
-        //layoutTexture.DrawRectangle(roomCandidateRect, Color.white);
+        if (_enableDebuggingInfo)
+        {
+            // Mark open doorways with a differently colored pixel. The color is determine by the direction of the hallway.
+            openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, h.StartDirection.GetColor()));
+        }
 
-        // Mark open doorways with a differently colored pixel. The color is determine by the direction of the hallway.
-        openDoorways.ForEach(h => layoutTexture.SetPixel(h.StartPositionAbsolute.x, h.StartPositionAbsolute.y, h.StartDirection.GetColor()));
-
-        // TODO: This is a temporary solution to show the selected entryway. Remove later.
-        //layoutTexture.SetPixel(selectedEntryway.StartPositionAbsolute.x, selectedEntryway.StartPositionAbsolute.y, Color.grey);
         layoutTexture.SaveAsset();
     }
 
