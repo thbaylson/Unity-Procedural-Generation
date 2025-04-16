@@ -18,6 +18,7 @@ public class RoomLayoutGenerator : MonoBehaviour
     // Use System.Random instead of Unity's Random to avoid potential overrides from 3rd party sources that change the behavior.
     Random random;
     Level level;
+    Dictionary<RoomTemplate, int> availableRooms;
 
 
     [ContextMenu("Generate New Seed")]
@@ -31,9 +32,11 @@ public class RoomLayoutGenerator : MonoBehaviour
     {
         random = new Random(seed);
         level = new Level(levelConfig.LevelWidth, levelConfig.LevelLength);
+        availableRooms = levelConfig.GetAvailableRooms();
         openDoorways = new List<Hallway>();
 
-        var roomRect = GetStartRoomRect();
+        RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
+        var roomRect = GetStartRoomRect(startRoomTemplate);
         Room startRoom = new Room(roomRect);
         level.AddRoom(startRoom);
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
@@ -62,16 +65,16 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// Find a random rectangle in the level layout. The rect will be in the center of the level.
     /// </summary>
     /// <returns>A rectangle that is in the center of the level.</returns>
-    private RectInt GetStartRoomRect()
+    private RectInt GetStartRoomRect(RoomTemplate roomTemplate)
     {
-        int roomWidth = random.Next(levelConfig.RoomWidthMin, levelConfig.RoomWidthMax + 1);
+        int roomWidth = random.Next(roomTemplate.RoomWidthMin, roomTemplate.RoomWidthMax + 1);
         // Imagine folding a piece of paper in half and cutting off the randomly chosen room width.
         //  When we add back a quarter of the level width later, we will have an x-coord in the middle two quarters of the level.
         int availableWidthX = level.Width / 2 - roomWidth;
         int randomX = random.Next(0, availableWidthX);
         int roomX = randomX + (level.Width / 4);
 
-        int roomLength = random.Next(levelConfig.RoomLengthMin, levelConfig.RoomLengthMax + 1);
+        int roomLength = random.Next(roomTemplate.RoomLengthMin, roomTemplate.RoomLengthMax + 1);
         int availableLengthY = level.Length / 2 - roomLength;
         int randomY = random.Next(0, availableLengthY);
         int roomY = randomY + (level.Length / 4);
@@ -167,9 +170,11 @@ public class RoomLayoutGenerator : MonoBehaviour
 
     private Room ConstructNextRoom(Hallway currentRoomExit)
     {
+        RoomTemplate nextRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
+
         RectInt roomCandidateRect = new RectInt {
-            width = random.Next(levelConfig.RoomWidthMin, levelConfig.RoomWidthMax + 1),
-            height = random.Next(levelConfig.RoomLengthMin, levelConfig.RoomLengthMax + 1)
+            width = random.Next(nextRoomTemplate.RoomWidthMin, nextRoomTemplate.RoomWidthMax + 1),
+            height = random.Next(nextRoomTemplate.RoomLengthMin, nextRoomTemplate.RoomLengthMax + 1)
         };
 
         // We're creating the hallway for the next Room before we create the room itself. The order of operations seems backwards.

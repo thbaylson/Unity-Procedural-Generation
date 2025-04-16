@@ -10,21 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa3585cef21caa54cba4d98d1d928a95, type: 3}
-  m_Name: SmallOrderly
+  m_Name: MixedSmallAndLarge
   m_EditorClassIdentifier: 
-  levelWidth: 32
-  levelLength: 32
+  levelWidth: 64
+  levelLength: 64
   levelPadding: 1
   roomMargin: 1
-  roomCountMin: 5
-  roomCountMax: 8
+  roomCountMin: 8
+  roomCountMax: 10
   roomTemplates:
-  - name: 
+  - name: Small
     roomCount: 10
     roomWidthMin: 3
-    roomWidthMax: 5
+    roomWidthMax: 3
     roomLengthMin: 3
-    roomLengthMax: 5
+    roomLengthMax: 3
+  - name: Large
+    roomCount: 10
+    roomWidthMin: 10
+    roomWidthMax: 10
+    roomLengthMin: 10
+    roomLengthMax: 10
   doorwayDistanceFromCorner: 1
-  hallwayWidthMin: 2
-  hallwayWidthMax: 3
+  hallwayWidthMin: 0
+  hallwayWidthMax: 4

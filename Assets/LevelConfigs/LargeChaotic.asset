@@ -16,12 +16,15 @@ MonoBehaviour:
   levelLength: 128
   levelPadding: 1
   roomMargin: 0
-  roomCountMin: 9
-  roomCountMax: 15
-  roomWidthMin: 3
-  roomWidthMax: 15
-  roomLengthMin: 3
-  roomLengthMax: 15
+  roomCountMin: 15
+  roomCountMax: 25
+  roomTemplates:
+  - name: 
+    roomCount: 10
+    roomWidthMin: 3
+    roomWidthMax: 20
+    roomLengthMin: 3
+    roomLengthMax: 20
   doorwayDistanceFromCorner: 1
-  hallwayWidthMin: 2
-  hallwayWidthMax: 6
+  hallwayWidthMin: 0
+  hallwayWidthMax: 8
