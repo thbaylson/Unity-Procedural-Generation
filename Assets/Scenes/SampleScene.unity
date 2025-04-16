@@ -222,7 +222,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 64, y: 64, z: 1}
+  m_LocalScale: {x: 32, y: 32, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -559,8 +559,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a98d79a0c314674ca2ee5851935d398, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 50095562
-  levelConfig: {fileID: 11400000, guid: 0b090ea362541a4459d469ce6deb3cb4, type: 2}
+  seed: 51595531
+  levelConfig: {fileID: 11400000, guid: 55fdd302f70616d41816816beff866a4, type: 2}
   levelLayoutDisplay: {fileID: 92743441}
   _enableDebuggingInfo: 0
 --- !u!4 &928695907

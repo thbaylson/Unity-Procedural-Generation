@@ -36,9 +36,8 @@ public class RoomLayoutGenerator : MonoBehaviour
         openDoorways = new List<Hallway>();
 
         RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
-        UseUpRoomTemplate(startRoomTemplate);
         var roomRect = GetStartRoomRect(startRoomTemplate);
-        Room startRoom = new Room(roomRect);
+        Room startRoom = CreateNewRoom(roomRect, startRoomTemplate);
         level.AddRoom(startRoom);
         
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
@@ -69,14 +68,16 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// <returns>A rectangle that is in the center of the level.</returns>
     private RectInt GetStartRoomRect(RoomTemplate roomTemplate)
     {
-        int roomWidth = random.Next(roomTemplate.RoomWidthMin, roomTemplate.RoomWidthMax + 1);
+        RectInt roomSize = roomTemplate.GenerateRoomCandidateRect(random);
+
+        int roomWidth = roomSize.width;
         // Imagine folding a piece of paper in half and cutting off the randomly chosen room width.
         //  When we add back a quarter of the level width later, we will have an x-coord in the middle two quarters of the level.
         int availableWidthX = level.Width / 2 - roomWidth;
         int randomX = random.Next(0, availableWidthX);
         int roomX = randomX + (level.Width / 4);
 
-        int roomLength = random.Next(roomTemplate.RoomLengthMin, roomTemplate.RoomLengthMax + 1);
+        int roomLength = roomSize.height;
         int availableLengthY = level.Length / 2 - roomLength;
         int randomY = random.Next(0, availableLengthY);
         int roomY = randomY + (level.Length / 4);
@@ -99,11 +100,23 @@ public class RoomLayoutGenerator : MonoBehaviour
         layoutTexture.Reinitialize(level.Width, level.Length);
         levelLayoutDisplay.transform.localScale = new Vector3(level.Width, level.Length, 1f);
 
-        // Fill the whole texture black and then just fill our new room cyan.
-        // TODO: This will likely need to change once we start adding more rooms.
+        // Fill the whole texture black.
         layoutTexture.FillWithColor(Color.black);
 
-        Array.ForEach(level.Rooms, room => layoutTexture.DrawRectangle(room.Area, Color.white));
+        // Normal rooms will be filled in with white. Special rooms will be filled in with their texture.
+        foreach (Room room in level.Rooms)
+        {
+            if (room.LayoutTexture == null)
+            {
+                layoutTexture.DrawRectangle(room.Area, Color.white);
+            }
+            else
+            {
+                layoutTexture.DrawTexture(room.LayoutTexture, room.Area);
+            }
+        }
+
+        // Hallways are filled in with white.
         Array.ForEach(level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
 
         if (_enableDebuggingInfo)
@@ -173,12 +186,7 @@ public class RoomLayoutGenerator : MonoBehaviour
     private Room ConstructNextRoom(Hallway currentRoomExit)
     {
         RoomTemplate nextRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
-
-        RectInt roomCandidateRect = new RectInt
-        {
-            width = random.Next(nextRoomTemplate.RoomWidthMin, nextRoomTemplate.RoomWidthMax + 1),
-            height = random.Next(nextRoomTemplate.RoomLengthMin, nextRoomTemplate.RoomLengthMax + 1)
-        };
+        RectInt roomCandidateRect = nextRoomTemplate.GenerateRoomCandidateRect(random);
 
         // We're creating the hallway for the next Room before we create the room itself. The order of operations seems backwards.
         //  I think we're doing it this way so that hallways are always straight. The room's position is based off of the hallway,
@@ -197,8 +205,7 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         if (!IsRoomCandidateValid(roomCandidateRect)) return null;
 
-        UseUpRoomTemplate(nextRoomTemplate);
-        Room nextRoom = new Room(roomCandidateRect);
+        Room nextRoom = CreateNewRoom(roomCandidateRect, nextRoomTemplate);
         currentRoomExit.EndRoom = nextRoom;
         currentRoomExit.EndPosition = nextRoomEntrance.StartPosition;
 
@@ -285,5 +292,21 @@ public class RoomLayoutGenerator : MonoBehaviour
         {
             availableRooms.Remove(roomTemplate);
         }
+    }
+
+    private Room CreateNewRoom(RectInt roomCandidateRect, RoomTemplate roomTemplate)
+    {
+        UseUpRoomTemplate(roomTemplate);
+        Room newRoom;
+        if(roomTemplate.LayoutTexture == null)
+        {
+            newRoom = new Room(roomCandidateRect);
+        }
+        else
+        {
+            newRoom = new Room(roomCandidateRect.x, roomCandidateRect.y, roomTemplate.LayoutTexture);
+        }
+
+        return newRoom;
     }
 }

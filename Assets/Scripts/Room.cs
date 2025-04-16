@@ -5,10 +5,17 @@ using UnityEngine;
 public class Room
 {
     public RectInt Area { get; private set; }
+    public Texture2D LayoutTexture { get; }
 
     public Room(RectInt area)
     {
         Area = area;
+    }
+
+    public Room(int x, int y, Texture2D layoutTexture)
+    {
+        Area = new RectInt(x, y, layoutTexture.width, layoutTexture.height);
+        LayoutTexture = layoutTexture;
     }
 
     /// <summary>
