@@ -36,9 +36,11 @@ public class RoomLayoutGenerator : MonoBehaviour
         openDoorways = new List<Hallway>();
 
         RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
+        UseUpRoomTemplate(startRoomTemplate);
         var roomRect = GetStartRoomRect(startRoomTemplate);
         Room startRoom = new Room(roomRect);
         level.AddRoom(startRoom);
+        
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
         List<Hallway> hallways = startRoom.CalcAllPossibleDoorways(startRoom.Area.width, startRoom.Area.height, levelConfig.DoorwayDistanceFromCorner);
         foreach (Hallway h in hallways)
@@ -172,7 +174,8 @@ public class RoomLayoutGenerator : MonoBehaviour
     {
         RoomTemplate nextRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
 
-        RectInt roomCandidateRect = new RectInt {
+        RectInt roomCandidateRect = new RectInt
+        {
             width = random.Next(nextRoomTemplate.RoomWidthMin, nextRoomTemplate.RoomWidthMax + 1),
             height = random.Next(nextRoomTemplate.RoomLengthMin, nextRoomTemplate.RoomLengthMax + 1)
         };
@@ -194,6 +197,7 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         if (!IsRoomCandidateValid(roomCandidateRect)) return null;
 
+        UseUpRoomTemplate(nextRoomTemplate);
         Room nextRoom = new Room(roomCandidateRect);
         currentRoomExit.EndRoom = nextRoom;
         currentRoomExit.EndPosition = nextRoomEntrance.StartPosition;
@@ -203,10 +207,8 @@ public class RoomLayoutGenerator : MonoBehaviour
 
     private void AddRooms()
     {
-        int roomCount = random.Next(levelConfig.RoomCountMin, levelConfig.RoomCountMax + 1);
-
         Hallway currentRoomExit;
-        while (openDoorways.Count > 0 && level.Rooms.Length < roomCount)
+        while (openDoorways.Count > 0 && level.Rooms.Length < levelConfig.RoomCountMax && availableRooms.Count > 0)
         {
             currentRoomExit = openDoorways[random.Next(openDoorways.Count)];
             Room newRoom = ConstructNextRoom(currentRoomExit);
@@ -276,4 +278,12 @@ public class RoomLayoutGenerator : MonoBehaviour
         return false;
     }
 
+    private void UseUpRoomTemplate(RoomTemplate roomTemplate)
+    {
+        availableRooms[roomTemplate]--;
+        if (availableRooms[roomTemplate] <= 0)
+        {
+            availableRooms.Remove(roomTemplate);
+        }
+    }
 }
