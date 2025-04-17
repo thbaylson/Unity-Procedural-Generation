@@ -7,7 +7,6 @@ using UnityEngine;
 public class RoomLayoutGenerator : MonoBehaviour
 {
     [Header("Level Layout Settings")]
-    [SerializeField] int seed = Environment.TickCount;
     [SerializeField] RoomLevelLayoutConfig levelConfig;
 
     [Header("Level Layout Display")]
@@ -24,13 +23,17 @@ public class RoomLayoutGenerator : MonoBehaviour
     [ContextMenu("Generate New Seed")]
     public void GenerateNewSeed()
     {
-        seed = Environment.TickCount;
+        SharedLevelData.Instance.GenerateSeed();
     }
 
     [ContextMenu("Generate Level Layout")]
     public void GenerateLevel()
     {
-        random = new Random(seed);
+        // This sets up back to the starting point for the random number generator.
+        SharedLevelData.Instance.ResetRandom();
+        random = SharedLevelData.Instance.Rand;
+
+        // Set up level configs.
         level = new Level(levelConfig.LevelWidth, levelConfig.LevelLength);
         availableRooms = levelConfig.GetAvailableRooms();
         openDoorways = new List<Hallway>();
@@ -40,6 +43,7 @@ public class RoomLayoutGenerator : MonoBehaviour
         //List<RoomTemplate> nonSpecialRooms = availableRooms.Where(r => r.Key.LayoutTexture == null).Select(r => r.Key).ToList();
         //RoomTemplate startRoomTemplate = nonSpecialRooms[random.Next(nonSpecialRooms.Count)];
 
+        // Generate the starting room.
         RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(0, availableRooms.Count));
         var roomRect = GetStartRoomRect(startRoomTemplate);
         Room startRoom = CreateNewRoom(roomRect, startRoomTemplate);
@@ -55,6 +59,7 @@ public class RoomLayoutGenerator : MonoBehaviour
             openDoorways.Add(h);
         }
 
+        // Generate all rooms after the first. TODO: Condense room generating logic.
         AddRooms();
 
         DrawLayout();

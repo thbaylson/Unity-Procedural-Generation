@@ -7,12 +7,13 @@ public class MarchingSquares : MonoBehaviour
     [SerializeField] Texture2D levelTexture;
     [SerializeField] GameObject generatedLevel;
     [SerializeField] Tileset tileset;
-    [SerializeField] int scale = 1;
 
     [ContextMenu("Create Level Geometry")]
     public void CreateLevelGeometry()
     {
         generatedLevel.transform.DestroyAllChildren();
+
+        int scale = SharedLevelData.Instance.Scale;
         Vector3 scaleVector = new Vector3(scale, scale, scale);
 
         TextureBasedLevel level = new TextureBasedLevel(levelTexture);
