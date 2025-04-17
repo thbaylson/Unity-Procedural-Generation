@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,14 +19,30 @@ public class Room
         LayoutTexture = layoutTexture;
     }
 
+    public List<Hallway> CalcPossibleDoorways(int width, int height, int minDistFromCorner)
+    {
+        List<Hallway> hallwayCandidates;
+        if (LayoutTexture == null)
+        {
+            hallwayCandidates = CalcPossibleDoorwaysFromRect(width, height, minDistFromCorner);
+        }
+        else
+        {
+            hallwayCandidates = CalcPossibleDoorwaysFromTexture(LayoutTexture);
+        }
+
+        return hallwayCandidates;
+    }
+
     /// <summary>
-    /// Calculates all possible doorways for a room. The doorways are the walls of the room, minus the distance from the corners.
+    /// Helper function for CalcPossibleDoorways. Calculates all possible doorways for a room.
+    /// The doorways are the walls of the room, minus the distance from the corners.
     /// </summary>
     /// <param name="width">The width of the room.</param>
     /// <param name="height">The height of the room.</param>
     /// <param name="minDistFromCorner">The minimum distance from the corner of the room.</param>
     /// <returns>A list of hallways. The start positions of the hallways will be relative to the room they are assigned to.</returns>
-    public List<Hallway> CalcAllPossibleDoorways(int width, int height, int minDistFromCorner)
+    private List<Hallway> CalcPossibleDoorwaysFromRect(int width, int height, int minDistFromCorner)
     {
         List<Hallway> hallwayCandidates = new List<Hallway>();
 
@@ -50,5 +67,35 @@ public class Room
         }
 
         return hallwayCandidates;
+    }
+
+    private List<Hallway> CalcPossibleDoorwaysFromTexture(Texture2D layoutTexture)
+    {
+        List<Hallway> hallwayCandidates = new List<Hallway>();
+        
+        int width = layoutTexture.width;
+        int height = layoutTexture.height;
+
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < width; x++)
+            {
+                Color pixelColor = layoutTexture.GetPixel(x, y);
+                HallwayDirection direction = GetHallwayDirection(pixelColor);
+                if (direction != HallwayDirection.Undefined)
+                {
+                    Hallway hallway = new Hallway(new Vector2Int(x, y), direction);
+                    hallwayCandidates.Add(hallway);
+                }
+            }
+        }
+
+        return hallwayCandidates;
+    }
+
+    private HallwayDirection GetHallwayDirection(Color pixelColor)
+    {
+        var colorToDirectionMap = HallwayDirectionExtension.GetColorToDirectionMap();
+        return colorToDirectionMap.TryGetValue(pixelColor, out HallwayDirection direction) ? direction : HallwayDirection.Undefined;
     }
 }

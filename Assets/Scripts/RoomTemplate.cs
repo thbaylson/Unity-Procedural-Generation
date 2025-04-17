@@ -15,6 +15,7 @@ public class RoomTemplate
     [SerializeField] int roomLengthMax = 5;
     [SerializeField] Texture2D layoutTexture;
 
+    public string Name { get => name; }
     public int RoomCount { get => roomCount; }
     public int RoomWidthMin { get => roomWidthMin; }
     public int RoomWidthMax { get => roomWidthMax; }

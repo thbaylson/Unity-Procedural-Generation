@@ -35,13 +35,18 @@ public class RoomLayoutGenerator : MonoBehaviour
         availableRooms = levelConfig.GetAvailableRooms();
         openDoorways = new List<Hallway>();
 
-        RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
+        // TODO: The algorithm is less likely to fail if the starting room is not a special room. BUT, this implementation doesn't work for "Donuts" level.
+        //  It would be nice if we could rotate special rooms. That would decrease the chance of failure.
+        //List<RoomTemplate> nonSpecialRooms = availableRooms.Where(r => r.Key.LayoutTexture == null).Select(r => r.Key).ToList();
+        //RoomTemplate startRoomTemplate = nonSpecialRooms[random.Next(nonSpecialRooms.Count)];
+
+        RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(0, availableRooms.Count));
         var roomRect = GetStartRoomRect(startRoomTemplate);
         Room startRoom = CreateNewRoom(roomRect, startRoomTemplate);
         level.AddRoom(startRoom);
         
         // TODO: Seems like we should just pass the Room object to CalcAllPossibleDoorways.
-        List<Hallway> hallways = startRoom.CalcAllPossibleDoorways(startRoom.Area.width, startRoom.Area.height, levelConfig.DoorwayDistanceFromCorner);
+        List<Hallway> hallways = startRoom.CalcPossibleDoorways(startRoom.Area.width, startRoom.Area.height, levelConfig.DoorwayDistanceFromCorner);
         foreach (Hallway h in hallways)
         {
             // Set the start room for each possible hallway to the level's start room.
@@ -60,6 +65,13 @@ public class RoomLayoutGenerator : MonoBehaviour
     {
         GenerateNewSeed();
         GenerateLevel();
+
+        // Special rooms will sometimes create levels with a below minimum number of rooms. TODO: Consider a more safe approach.
+        //  Maybe add to room validation that we will have at least one open door after that room is placed?
+        //while(level.Rooms.Length < levelConfig.RoomCountMin)
+        //{
+        //    GenerateLevel();
+        //}
     }
 
     /// <summary>
@@ -119,6 +131,9 @@ public class RoomLayoutGenerator : MonoBehaviour
         // Hallways are filled in with white.
         Array.ForEach(level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
 
+        // Special room textures should be converted to black and white after we're done working with them.
+        layoutTexture.ConvertToBlackAndWhite();
+
         if (_enableDebuggingInfo)
         {
             // Mark open doorways with a differently colored pixel. The color is determine by the direction of the hallway.
@@ -131,16 +146,14 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// <summary>
     /// Select a random hallway from the list of possible doorways. The selected hallway is the next room's entrance.
     /// </summary>
-    /// <param name="roomCandidate">The rectangle that is used to create the next room.</param>
+    /// <param name="roomCandidateRect">The rectangle that is used to create the next room.</param>
     /// <param name="currentRoomExit">The current room's exit. This is used to determine the direction of the next room's entrance.</param>
     /// <returns>A hallway with a relative starting position to the roomCandidate. The start direction will point towards currentRoomExit.</returns>
-    private Hallway SelectHallwayCandidate(RectInt roomCandidate, Hallway currentRoomExit)
+    private Hallway SelectHallwayCandidate(RectInt roomCandidateRect, RoomTemplate roomTemplate, Hallway currentRoomExit)
     {
-        // We're currently assuming that we'll always have space for the next room. That'll have to change
-        //  or else we'll eventually run out of bounds.
-        Room nextRoom = new Room(roomCandidate);
+        Room nextRoom = CreateNewRoom(roomCandidateRect, roomTemplate, false);
 
-        List<Hallway> hallwayCandidates = nextRoom.CalcAllPossibleDoorways(roomCandidate.width, roomCandidate.height, levelConfig.DoorwayDistanceFromCorner);
+        List<Hallway> hallwayCandidates = nextRoom.CalcPossibleDoorways(roomCandidateRect.width, roomCandidateRect.height, levelConfig.DoorwayDistanceFromCorner);
         HallwayDirection requiredDirection = currentRoomExit.StartDirection.GetOppositeDirection();
         List<Hallway> filteredHallwayCandidates = hallwayCandidates.Where(h => h.StartDirection == requiredDirection).ToList();
 
@@ -191,7 +204,7 @@ public class RoomLayoutGenerator : MonoBehaviour
         // We're creating the hallway for the next Room before we create the room itself. The order of operations seems backwards.
         //  I think we're doing it this way so that hallways are always straight. The room's position is based off of the hallway,
         //  instead of the other way around. But, if hallways are always straight, that'll look boring after a while.
-        Hallway nextRoomEntrance = SelectHallwayCandidate(roomCandidateRect, currentRoomExit);
+        Hallway nextRoomEntrance = SelectHallwayCandidate(roomCandidateRect, nextRoomTemplate, currentRoomExit);
         if (nextRoomEntrance == null) return null;
 
         Vector2Int roomCandidatePosition = CalcNextRoomPosition(
@@ -234,11 +247,22 @@ public class RoomLayoutGenerator : MonoBehaviour
             openDoorways.Remove(currentRoomExit);
 
             // Get all new doorways
-            List<Hallway> newDoorways = newRoom.CalcAllPossibleDoorways(newRoom.Area.width, newRoom.Area.height, levelConfig.DoorwayDistanceFromCorner);
+            List<Hallway> newDoorways = newRoom.CalcPossibleDoorways(newRoom.Area.width, newRoom.Area.height, levelConfig.DoorwayDistanceFromCorner);
             // TODO: This should probably happen in CalcAllPossibleDoorways
             newDoorways.ForEach(h => h.StartRoom = newRoom);
             // Add all new doorways that do not point in the direction we just came from
             openDoorways.AddRange(newDoorways.Where(h => h.StartDirection != currentRoomExit.StartDirection.GetOppositeDirection()));
+        }
+
+        if(_enableDebuggingInfo)
+        {
+            Debug.Log(String.Join(
+                Environment.NewLine,
+                "Finished adding rooms.",
+                $"Open Doorways: {openDoorways.Count}",
+                $"Room Count: {level.Rooms.Length}",
+                $"Available Rooms Count: {availableRooms.Count}"
+            ));
         }
     }
 
@@ -294,9 +318,10 @@ public class RoomLayoutGenerator : MonoBehaviour
         }
     }
 
-    private Room CreateNewRoom(RectInt roomCandidateRect, RoomTemplate roomTemplate)
+    private Room CreateNewRoom(RectInt roomCandidateRect, RoomTemplate roomTemplate, bool useUpRoom= true)
     {
-        UseUpRoomTemplate(roomTemplate);
+        if (useUpRoom) UseUpRoomTemplate(roomTemplate);
+        
         Room newRoom;
         if(roomTemplate.LayoutTexture == null)
         {
