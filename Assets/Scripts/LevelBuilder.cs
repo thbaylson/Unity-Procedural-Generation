@@ -34,13 +34,30 @@ public class LevelBuilder : MonoBehaviour
         //RegenerateGeometry();
 
         roomLayoutGenerator.GenerateNewSeed();
-        roomLayoutGenerator.GenerateLevel();
+        Level level = roomLayoutGenerator.GenerateLevel();
         levelGeometryGenerator.CreateLevelGeometry();
         navMeshSurface.BuildNavMesh();
+
+        Room startRoom = level.PlayerStartRoom;
+        Vector3 startPosition = LevelPositionToWorldPosition(startRoom.Area.center);
+
+        // Why not make the player a property of LevelBuilder and instantiate it?
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player.transform.position = startPosition;
+    }
+
+    private Vector3 LevelPositionToWorldPosition(Vector2 levelPosition)
+    {
+        int scale = SharedLevelData.Instance.Scale;
+        return new Vector3(
+            (levelPosition.x - 1) * scale,
+            0f,
+            (levelPosition.y - 1) * scale
+        );
     }
 
     private void Start()
     {
-        GenerateLayoutAndGeometry();
+        //GenerateLayoutAndGeometry();
     }
 }

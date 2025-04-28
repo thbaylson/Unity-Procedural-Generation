@@ -27,7 +27,7 @@ public class RoomLayoutGenerator : MonoBehaviour
     }
 
     [ContextMenu("Generate Level Layout")]
-    public void GenerateLevel()
+    public Level GenerateLevel()
     {
         // This sets up back to the starting point for the random number generator.
         SharedLevelData.Instance.ResetRandom();
@@ -61,8 +61,12 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         // Generate all rooms after the first. TODO: Condense room generating logic.
         AddRooms();
+        level.PlayerStartRoom = level.Rooms[random.Next(level.Rooms.Length)];
 
+        // TODO: This function does too much. Should move the draw logic out.
         DrawLayout();
+
+        return level;
     }
 
     [ContextMenu("Generate New Seed And New Level")]
