@@ -7,31 +7,36 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] MarchingSquares levelGeometryGenerator;
     [SerializeField] NavMeshSurface navMeshSurface;
 
-    [ContextMenu("Regenerate Level Layout")]
-    public void RegenerateLevelLayout()
-    {
-        roomLayoutGenerator.GenerateLevel();
-    }
+    //[ContextMenu("Regen Level Layout")]
+    //public void RegenerateLevelLayout()
+    //{
+    //    roomLayoutGenerator.GenerateLevel();
+    //}
 
-    [ContextMenu("Generate Level Layout")]
-    public void GenerateRandomLayout()
-    {
-        roomLayoutGenerator.GenerateNewSeed();
-        RegenerateLevelLayout();
-    }
+    //[ContextMenu("Gen Level Layout")]
+    //public void GenerateRandomLayout()
+    //{
+    //    roomLayoutGenerator.GenerateNewSeed();
+    //    RegenerateLevelLayout();
+    //}
 
-    [ContextMenu("Regenerate Geometry")]
-    public void RegenerateGeometry()
-    {
-        levelGeometryGenerator.CreateLevelGeometry();
-        navMeshSurface.BuildNavMesh();
-    }
+    //[ContextMenu("Regen Geometry")]
+    //public void RegenerateGeometry()
+    //{
+    //    levelGeometryGenerator.CreateLevelGeometry();
+    //    navMeshSurface.BuildNavMesh();
+    //}
 
-    [ContextMenu("Generate Level Layout And Geometry")]
+    [ContextMenu("Gen Level And Geometry")]
     public void GenerateLayoutAndGeometry()
     {
-        GenerateRandomLayout();
-        RegenerateGeometry();
+        //GenerateRandomLayout();
+        //RegenerateGeometry();
+
+        roomLayoutGenerator.GenerateNewSeed();
+        roomLayoutGenerator.GenerateLevel();
+        levelGeometryGenerator.CreateLevelGeometry();
+        navMeshSurface.BuildNavMesh();
     }
 
     private void Start()
