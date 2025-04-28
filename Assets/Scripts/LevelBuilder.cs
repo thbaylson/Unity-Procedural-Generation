@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.AI.Navigation;
+using UnityEngine.AI;
 
 public class LevelBuilder : MonoBehaviour
 {
@@ -7,32 +8,9 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] MarchingSquares levelGeometryGenerator;
     [SerializeField] NavMeshSurface navMeshSurface;
 
-    //[ContextMenu("Regen Level Layout")]
-    //public void RegenerateLevelLayout()
-    //{
-    //    roomLayoutGenerator.GenerateLevel();
-    //}
-
-    //[ContextMenu("Gen Level Layout")]
-    //public void GenerateRandomLayout()
-    //{
-    //    roomLayoutGenerator.GenerateNewSeed();
-    //    RegenerateLevelLayout();
-    //}
-
-    //[ContextMenu("Regen Geometry")]
-    //public void RegenerateGeometry()
-    //{
-    //    levelGeometryGenerator.CreateLevelGeometry();
-    //    navMeshSurface.BuildNavMesh();
-    //}
-
     [ContextMenu("Gen Level And Geometry")]
     public void GenerateLayoutAndGeometry()
     {
-        //GenerateRandomLayout();
-        //RegenerateGeometry();
-
         roomLayoutGenerator.GenerateNewSeed();
         Level level = roomLayoutGenerator.GenerateLevel();
         levelGeometryGenerator.CreateLevelGeometry();
@@ -43,7 +21,15 @@ public class LevelBuilder : MonoBehaviour
 
         // Why not make the player a property of LevelBuilder and instantiate it?
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        player.transform.position = startPosition;
+        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            player.transform.position = startPosition;
+        }
+        else
+        {
+            agent.Warp(startPosition);
+        }
     }
 
     private Vector3 LevelPositionToWorldPosition(Vector2 levelPosition)
