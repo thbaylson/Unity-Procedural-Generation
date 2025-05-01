@@ -7,6 +7,7 @@ public class RoomDecorator : MonoBehaviour
 {
     [SerializeField] GameObject parent;
     [SerializeField] RoomLayoutGenerator roomLayoutGenerator;
+    [SerializeField] BaseDecoratorRule[] availableRules;
     [SerializeField] Texture2D levelTexture;
     [SerializeField] Texture2D decoratedTexture;
 
@@ -35,6 +36,7 @@ public class RoomDecorator : MonoBehaviour
         }
 
         TileType[,] levelDecorated = InitializeDecoratorArray();
+        DecorateRoom(levelDecorated, level.Rooms[0], decorationsTransform);
         GenerateTextureFromTileType(levelDecorated);
     }
 
@@ -58,6 +60,15 @@ public class RoomDecorator : MonoBehaviour
         }
 
         return levelDecorated;
+    }
+
+    private void DecorateRoom(TileType[,] levelDecorated, Room room, Transform decorationsTransform)
+    {
+        BaseDecoratorRule selectedRule = availableRules[0];
+        if (selectedRule.CanBeApplied(levelDecorated, room))
+        {
+            selectedRule.Apply(levelDecorated, room, decorationsTransform);
+        }
     }
 
     private void GenerateTextureFromTileType(TileType[,] tileTypes)
