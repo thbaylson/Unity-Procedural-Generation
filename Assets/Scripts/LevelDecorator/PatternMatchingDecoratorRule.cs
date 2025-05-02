@@ -1,0 +1,82 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Random = System.Random;
+
+[Serializable]
+[CreateAssetMenu(fileName = "DecoratorRule", menuName = "ScriptableObjects/Procedural Generation/Pattern Decorator Rule")]
+public class PatternMatchingDecoratorRule : BaseDecoratorRule
+{
+    [SerializeField] GameObject prefab;
+    [Tooltip("Make sure this has the same dimensions as fill.")]
+    [SerializeField] Array2DWrapper<TileType> placement;
+    [Tooltip("Make sure this has the same dimensions as placement.")]
+    [SerializeField] Array2DWrapper<TileType> fill;
+
+    internal override void Apply(TileType[,] levelDecorated, Room room, Transform parent)
+    {
+        Vector2Int[] occurrances = FindOccurrences(levelDecorated, room);
+        if (occurrances.Length == 0) return;
+
+        Random random = SharedLevelData.Instance.Rand;
+
+        int occurranceIndex = random.Next(occurrances.Length);
+        Vector2Int occurrance = occurrances[occurranceIndex];
+        for (int y = 0; y < placement.Height; y++)
+        {
+            for (int x = 0; x < placement.Width; x++)
+            {
+                TileType tileType = fill[x, y];
+                levelDecorated[occurrance.x + x, occurrance.y + y] = tileType;
+            }
+        }
+    }
+
+    internal override bool CanBeApplied(TileType[,] levelDecorated, Room room)
+    {
+        bool canBeApplied = false;
+        if (FindOccurrences(levelDecorated, room).Length > 0)
+        {
+            canBeApplied = true;
+        }
+        return canBeApplied;
+    }
+
+    private Vector2Int[] FindOccurrences(TileType[,] levelDecorated, Room room)
+    {
+        List<Vector2Int> occurrences = new();
+        // We need to iterate over each position in the room. Room coordinates do not include the walls,
+        //  so we need to subtract 1 to start on the wall. This is also why we add 2 to the width and height of the room.
+        //  We subtract placement.Width and Height to make sure the pattern doesn't go out of bounds. For example, we know
+        //  that the top left corner of a 2 x 2 pattern can't start in the bottom right corner of the room.
+        for (int y = room.Area.position.y - 1; y < room.Area.position.y + room.Area.height + 2 - placement.Height; y++)
+        {
+            for (int x = room.Area.position.x - 1; x < room.Area.position.x + room.Area.width + 2 - placement.Width; x++)
+            {
+                if (IsPatternAtPosition(levelDecorated, placement, x, y))
+                {
+                    occurrences.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        return occurrences.ToArray();
+    }
+
+    private bool IsPatternAtPosition(TileType[,] levelDecorated, Array2DWrapper<TileType> pattern, int startX, int startY)
+    {
+        for(int yOffset = 0; yOffset < pattern.Height; yOffset++)
+        {
+            for (int xOffset = 0; xOffset < pattern.Width; xOffset++)
+            {
+                if (levelDecorated[startX + xOffset, startY + yOffset] != pattern[xOffset, yOffset])
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
