@@ -119,7 +119,11 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         // We must do this if the width and height has changed since the last time we generated a texture.
         layoutTexture.Reinitialize(level.Width, level.Length);
-        levelLayoutDisplay.transform.localScale = new Vector3(level.Width, level.Length, 1f);
+        int scale = SharedLevelData.Instance.Scale;
+        levelLayoutDisplay.transform.localScale = new Vector3(level.Width * scale, level.Length * scale, 1f);
+        // This will center the level layout texture in the middle of the generated geometry. Y-axis is .1 to prevent z-fighting with the level floor.
+        //  Note: We subtract off the scale while calculating the position because we used the Marching Squares algorithm to generate the walls.
+        levelLayoutDisplay.transform.position = new Vector3((level.Width * scale / 2) - scale, 0.1f, (level.Length * scale / 2) - scale);
 
         // Fill the whole texture black.
         layoutTexture.FillWithColor(Color.black);

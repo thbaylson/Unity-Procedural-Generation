@@ -31,6 +31,12 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
                 levelDecorated[occurrance.x + x, occurrance.y + y] = tileType;
             }
         }
+
+        GameObject decoration = Instantiate(prefab, parent.transform);
+        Vector3 center = new Vector3(occurrance.x + placement.Width / 2f, 0f, occurrance.y + placement.Height / 2f);
+        int scale = SharedLevelData.Instance.Scale;
+        decoration.transform.position = (center + new Vector3(-1, 0, -1)) * scale;
+        decoration.transform.localScale = Vector3.one * scale;
     }
 
     internal override bool CanBeApplied(TileType[,] levelDecorated, Room room)
