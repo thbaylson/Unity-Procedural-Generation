@@ -67,12 +67,20 @@ public class RoomDecorator : MonoBehaviour
 
     private void DecorateRoom(TileType[,] levelDecorated, Room room, Transform decorationsTransform)
     {
-        foreach(BaseDecoratorRule rule in availableRules)
+        // Note: This is an example of limiting decorations according to room size. However, I don't think I want to do this.
+        //int maxNumDecorations = room.Area.width * room.Area.height / 4;
+        //int numDecorationsToPlace = random.Next(maxNumDecorations);
+        //int currentDecorations = 0;
+
+        foreach (BaseDecoratorRule rule in availableRules)
         {
             if (rule.CanBeApplied(levelDecorated, room))
             {
                 rule.Apply(levelDecorated, room, decorationsTransform);
+                //currentDecorations++;
             }
+
+            //if (currentDecorations >= numDecorationsToPlace) break;
         }
     }
 

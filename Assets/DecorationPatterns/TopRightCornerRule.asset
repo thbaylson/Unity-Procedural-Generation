@@ -21,3 +21,6 @@ MonoBehaviour:
     array: 03000000040000000400000004000000
     width: 2
     height: 2
+  centerHorizontally: 0
+  centerVertically: 0
+  matchMultiple: 1
