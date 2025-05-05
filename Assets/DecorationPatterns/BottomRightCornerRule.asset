@@ -10,14 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
-  m_Name: CornerRule
+  m_Name: BottomRightCornerRule
   m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
+  prefab: {fileID: 6519214928949641304, guid: cef1907dd77574d44a41501ed849fe9b, type: 3}
+  prefabRotation: 180
   placement:
-    array: 04000000040000000400000002000000
+    array: 04000000040000000200000004000000
     width: 2
     height: 2
   fill:
-    array: 04000000040000000400000003000000
+    array: 04000000040000000300000004000000
     width: 2
     height: 2
+  centerHorizontally: 0
+  centerVertically: 0

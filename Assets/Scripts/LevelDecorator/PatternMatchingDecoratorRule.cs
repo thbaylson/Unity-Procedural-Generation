@@ -9,6 +9,8 @@ using Random = System.Random;
 public class PatternMatchingDecoratorRule : BaseDecoratorRule
 {
     [SerializeField] GameObject prefab;
+    [SerializeField] float prefabRotation = 0f;
+
     [Tooltip("Make sure this has the same dimensions as fill.")]
     [SerializeField] Array2DWrapper<TileType> placement;
     [Tooltip("Make sure this has the same dimensions as placement.")]
@@ -41,6 +43,8 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
         }
 
         GameObject decoration = Instantiate(prefab, parent.transform);
+        Vector3 currentRotation = decoration.transform.rotation.eulerAngles;
+        decoration.transform.eulerAngles = currentRotation + new Vector3(0f, prefabRotation, 0f);
         Vector3 center = new Vector3(occurrance.x + placement.Width / 2f, 0f, occurrance.y + placement.Height / 2f);
         int scale = SharedLevelData.Instance.Scale;
         decoration.transform.position = (center + new Vector3(-1, 0, -1)) * scale;

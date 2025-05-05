@@ -10,14 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
-  m_Name: CornerRule 3
+  m_Name: EastWallTripleBarrel
   m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
+  prefab: {fileID: 2695916750597999422, guid: 2441dff5398a2004d91ea62a8cc071c2, type: 3}
+  prefabRotation: 90
   placement:
-    array: 04000000040000000200000004000000
+    array: 020000000400000002000000040000000200000004000000
     width: 2
-    height: 2
+    height: 3
   fill:
-    array: 04000000040000000300000004000000
+    array: 020000000400000003000000040000000200000004000000
     width: 2
-    height: 2
+    height: 3
+  centerHorizontally: 0
+  centerVertically: 0
