@@ -16,28 +16,17 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
 
     [SerializeField] bool centerHorizontally = false;
     [SerializeField] bool centerVertically = false;
-    [SerializeField] bool matchMultiple = false;
 
     internal override void Apply(TileType[,] levelDecorated, Room room, Transform parent)
     {
         Vector2Int[] occurrances = FindOccurrences(levelDecorated, room);
         if (occurrances.Length == 0) return;
 
-        if (matchMultiple)
-        {
-            foreach(var occurance in occurrances)
-            {
-                PlaceDecoration(levelDecorated, parent, occurance);
-            }
-        }
-        else
-        {
-            Random random = SharedLevelData.Instance.Rand;
-            int occurranceIndex = random.Next(occurrances.Length);
-            Vector2Int occurrance = occurrances[occurranceIndex];
+        Random random = SharedLevelData.Instance.Rand;
+        int occurranceIndex = random.Next(occurrances.Length);
+        Vector2Int occurrance = occurrances[occurranceIndex];
             
-            PlaceDecoration(levelDecorated, parent, occurrance);
-        }
+        PlaceDecoration(levelDecorated, parent, occurrance);
     }
 
     private void PlaceDecoration(TileType[,] levelDecorated, Transform parent, Vector2Int occurrance)
