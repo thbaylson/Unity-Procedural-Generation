@@ -44,7 +44,7 @@ public class RoomLayoutGenerator : MonoBehaviour
         //RoomTemplate startRoomTemplate = nonSpecialRooms[random.Next(nonSpecialRooms.Count)];
 
         // Generate the starting room.
-        RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(0, availableRooms.Count));
+        RoomTemplate startRoomTemplate = availableRooms.Keys.ElementAt(random.Next(availableRooms.Count));
         var roomRect = GetStartRoomRect(startRoomTemplate);
         Room startRoom = CreateNewRoom(roomRect, startRoomTemplate);
         level.AddRoom(startRoom);
@@ -95,12 +95,12 @@ public class RoomLayoutGenerator : MonoBehaviour
         // Imagine folding a piece of paper in half and cutting off the randomly chosen room width.
         //  When we add back a quarter of the level width later, we will have an x-coord in the middle two quarters of the level.
         int availableWidthX = level.Width / 2 - roomWidth;
-        int randomX = random.Next(0, availableWidthX);
+        int randomX = random.Next(availableWidthX);
         int roomX = randomX + (level.Width / 4);
 
         int roomLength = roomSize.height;
         int availableLengthY = level.Length / 2 - roomLength;
-        int randomY = random.Next(0, availableLengthY);
+        int randomY = random.Next(availableLengthY);
         int roomY = randomY + (level.Length / 4);
 
         return new RectInt(roomX, roomY, roomWidth, roomLength);

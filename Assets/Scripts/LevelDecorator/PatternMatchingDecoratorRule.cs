@@ -53,12 +53,7 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
 
     internal override bool CanBeApplied(TileType[,] levelDecorated, Room room)
     {
-        bool canBeApplied = false;
-        if (FindOccurrences(levelDecorated, room).Length > 0)
-        {
-            canBeApplied = true;
-        }
-        return canBeApplied;
+        return FindOccurrences(levelDecorated, room).Length > 0;
     }
 
     private Vector2Int[] FindOccurrences(TileType[,] levelDecorated, Room room)
