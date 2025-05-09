@@ -52,6 +52,8 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
         int scale = SharedLevelData.Instance.Scale;
         decoration.transform.position = (center + new Vector3(-1, 0, -1)) * scale;
         decoration.transform.localScale = Vector3.one * scale;
+
+        decoration.GetComponent<PropVariationGenerator>()?.GenerateVariation();
     }
 
     internal override bool CanBeApplied(TileType[,] levelDecorated, Room room)
