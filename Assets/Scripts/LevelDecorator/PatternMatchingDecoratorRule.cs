@@ -38,6 +38,9 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
             for (int x = 0; x < placement.Width; x++)
             {
                 TileType tileType = fill[x, y];
+                // Don't place the tile if it's a No-Op
+                if (TileType.Noop.Equals(tileType)) continue;
+
                 levelDecorated[occurrance.x + x, occurrance.y + y] = tileType;
             }
         }
@@ -90,7 +93,7 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
         {
             for (int xOffset = 0; xOffset < pattern.Width; xOffset++)
             {
-                if (levelDecorated[startX + xOffset, startY + yOffset] != pattern[xOffset, yOffset])
+                if (!TileType.Noop.Equals(pattern[xOffset, yOffset]) && levelDecorated[startX + xOffset, startY + yOffset] != pattern[xOffset, yOffset])
                 {
                     return false;
                 }

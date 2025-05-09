@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
-  m_Name: EastWallTripleBarrel
+  m_Name: NorthWallChains
   m_EditorClassIdentifier: 
-  prefab: {fileID: 2695916750597999422, guid: 2441dff5398a2004d91ea62a8cc071c2, type: 3}
-  prefabRotation: 90
+  prefab: {fileID: 8369787655800760277, guid: 830f2c63239435d4c9cf61330d595b2e, type: 3}
+  prefabRotation: 0
   placement:
-    array: 000000000400000002000000040000000000000004000000
-    width: 2
-    height: 3
+    array: 000000000200000000000000040000000400000004000000
+    width: 3
+    height: 2
   fill:
-    array: 000000000400000003000000040000000000000004000000
-    width: 2
-    height: 3
+    array: 000000000200000000000000050000000500000005000000
+    width: 3
+    height: 2
   centerHorizontally: 0
   centerVertically: 0
