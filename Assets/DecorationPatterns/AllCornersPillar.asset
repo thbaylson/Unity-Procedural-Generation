@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eb00df7d84536d499de06f8d86ef745, type: 3}
   m_Name: AllCornersPillar
   m_EditorClassIdentifier: 
+  roomType: 1
   childRules:
   - {fileID: 11400000, guid: aa65d52a0e0e3f7409d41f0eab48e593, type: 2}
   - {fileID: 11400000, guid: 82689f33b74246940a20351e5e971426, type: 2}

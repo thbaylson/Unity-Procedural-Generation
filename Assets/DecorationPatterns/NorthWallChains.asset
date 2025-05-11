@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
   m_Name: NorthWallChains
   m_EditorClassIdentifier: 
+  roomType: 32
   prefab: {fileID: 8369787655800760277, guid: 830f2c63239435d4c9cf61330d595b2e, type: 3}
   prefabRotation: 0
   placement:

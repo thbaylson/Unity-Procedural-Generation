@@ -3,10 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Flags]
+public enum RoomType
+{
+    Default     = 1,
+    Start       = 1 << 1,
+    Exit        = 1 << 2,
+    Boss        = 1 << 3,
+    Treasure    = 1 << 4,
+    Prison      = 1 << 5,
+    Library     = 1 << 6,
+    Shop        = 1 << 7,
+}
+
 public class Room
 {
     public RectInt Area { get; private set; }
     public Texture2D LayoutTexture { get; }
+    public int Connectedness => hallways.Count;
+
+    private List<Hallway> hallways = new();
 
     public Room(RectInt area)
     {
@@ -32,6 +48,11 @@ public class Room
         }
 
         return hallwayCandidates;
+    }
+
+    public void AddHallway(Hallway hallway)
+    {
+        hallways.Add(hallway);
     }
 
     /// <summary>

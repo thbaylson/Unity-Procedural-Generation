@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Random = System.Random;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public class RoomLayoutGenerator : MonoBehaviour
 {
@@ -61,12 +62,27 @@ public class RoomLayoutGenerator : MonoBehaviour
 
         // Generate all rooms after the first. TODO: Condense room generating logic.
         AddRooms();
+        AddHallwaysToRooms();
         level.PlayerStartRoom = level.Rooms[random.Next(level.Rooms.Length)];
 
         // TODO: This function does too much. Should move the draw logic out.
         DrawLayout();
 
         return level;
+    }
+
+    private void AddHallwaysToRooms()
+    {
+        foreach(Room room in level.Rooms)
+        {
+            // Get the hallways that start in the current room.
+            List<Hallway> hallways = Array.FindAll(level.Hallways, h => h.StartRoom == room).ToList();
+            // Append the hallways that end in the current room.
+            hallways.AddRange(Array.FindAll(level.Hallways, h => h.EndRoom == room));
+            // Add each hallway to the room.
+            //Array.ForEach(hallways, );
+            hallways.ForEach(h => room.AddHallway(h));
+        }
     }
 
     [ContextMenu("Generate New Seed And New Level")]
@@ -138,6 +154,11 @@ public class RoomLayoutGenerator : MonoBehaviour
             else
             {
                 layoutTexture.DrawTexture(room.LayoutTexture, room.Area);
+            }
+
+            if (_enableDebuggingInfo)
+            {
+                Debug.Log($"Area: {room.Area}. Connectedness: {room.Connectedness}.");
             }
         }
 

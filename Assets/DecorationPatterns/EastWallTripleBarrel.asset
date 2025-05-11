@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
   m_Name: EastWallTripleBarrel
   m_EditorClassIdentifier: 
+  roomType: 1
   prefab: {fileID: 2695916750597999422, guid: 2441dff5398a2004d91ea62a8cc071c2, type: 3}
   prefabRotation: 90
   placement:
