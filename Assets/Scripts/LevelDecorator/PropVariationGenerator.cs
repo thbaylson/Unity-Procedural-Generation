@@ -5,10 +5,16 @@ public class PropVariationGenerator : MonoBehaviour
     [ContextMenu("Generate Variation")]
     internal void GenerateVariation()
     {
-        var propSelections = GetComponents<PropSelectionXor>();
-        foreach (var propSelection in propSelections)
+        var xorProps = GetComponents<PropSelectionXor>();
+        foreach (var prop in xorProps)
         {
-            propSelection.GenerateVariation();
+            prop.GenerateVariation();
+        }
+
+        var orProps = GetComponents<PropVariationOr>();
+        foreach (var prop in orProps)
+        {
+            prop.GenerateVariation();
         }
     }
 }
