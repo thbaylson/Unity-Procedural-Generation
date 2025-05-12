@@ -89,6 +89,29 @@ public class RoomLayoutGenerator : MonoBehaviour
         Room exitRoom = deadEnds.OrderByDescending(r => Vector2.Distance(startRoom.Area.center, r.Area.center)).FirstOrDefault();
         exitRoom.Type = RoomType.Exit;
         deadEnds.Remove(exitRoom);
+
+        // A level should have a max of 3 treasure rooms. TODO: Make this configurable.
+        List<Room> treasureRooms = deadEnds.OrderBy(r => random.Next()).Take(3).ToList();
+        deadEnds.RemoveAll(r => treasureRooms.Contains(r));
+        treasureRooms.ForEach(r => r.Type = RoomType.Treasure);
+
+        // Find the best candidate for the boss room.
+        List<Room> emptyRooms = level.Rooms.Where(r => r.Type.HasFlag(RoomType.Default)).ToList();
+        Room bossRoom = emptyRooms
+            .OrderByDescending(r => Vector2.Distance(startRoom.Area.center, r.Area.center))
+            .OrderByDescending(r => r.Connectedness)
+            .OrderByDescending(r => r.Area.width * r.Area.height)
+            .FirstOrDefault();
+        bossRoom.Type = RoomType.Boss;
+        emptyRooms.Remove(bossRoom);
+
+        // Find the rest of the room types.
+        RoomType[] typesToAssign = {RoomType.Prison, RoomType.Library, RoomType.Shop };
+        List<Room> roomsToAssign = emptyRooms.OrderBy(r => random.Next()).Take(typesToAssign.Length).ToList();
+        for (int i = 0; i < typesToAssign.Length; i++)
+        {
+            roomsToAssign[i].Type = typesToAssign[i];
+        }
     }
 
     private void AddHallwaysToRooms()
