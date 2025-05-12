@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
-  m_Name: 3x3-CenteredRule
+  m_Name: LevelStart
   m_EditorClassIdentifier: 
-  roomType: 16
-  prefab: {fileID: 7485526607221692549, guid: 76a6c079acf497d40b6877f3e6350852, type: 3}
+  roomType: 2
+  prefab: {fileID: 0}
   prefabRotation: 0
   placement:
-    array: 020000000200000002000000020000000200000002000000020000000200000002000000
-    width: 3
-    height: 3
+    array: 02000000
+    width: 1
+    height: 1
   fill:
-    array: 020000000200000002000000020000000600000002000000020000000200000002000000
-    width: 3
-    height: 3
+    array: 05000000
+    width: 1
+    height: 1
   centerHorizontally: 1
   centerVertically: 1

@@ -22,9 +22,31 @@ MonoBehaviour:
   - name: 
     roomCount: 10
     roomWidthMin: 3
+    roomWidthMax: 3
+    roomLengthMin: 3
+    roomLengthMax: 3
+    layoutTexture: {fileID: 0}
+  - name: 
+    roomCount: 10
+    roomWidthMin: 25
+    roomWidthMax: 50
+    roomLengthMin: 25
+    roomLengthMax: 50
+    layoutTexture: {fileID: 0}
+  - name: 
+    roomCount: 10
+    roomWidthMin: 3
     roomWidthMax: 50
     roomLengthMin: 3
     roomLengthMax: 50
+    layoutTexture: {fileID: 0}
+  - name: 
+    roomCount: 10
+    roomWidthMin: 3
+    roomWidthMax: 50
+    roomLengthMin: 3
+    roomLengthMax: 50
+    layoutTexture: {fileID: 0}
   doorwayDistanceFromCorner: 1
   hallwayWidthMin: 0
   hallwayWidthMax: 15

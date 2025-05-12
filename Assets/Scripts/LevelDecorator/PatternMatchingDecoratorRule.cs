@@ -33,6 +33,8 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
 
     private void PlaceDecoration(TileType[,] levelDecorated, Transform parent, Vector2Int occurrance)
     {
+        if (prefab == null) return;
+
         for (int y = 0; y < placement.Height; y++)
         {
             for (int x = 0; x < placement.Width; x++)
@@ -76,6 +78,7 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
             for (int x = room.Area.position.x - 1; x < room.Area.position.x + room.Area.width + 2 - placement.Width; x++)
             {
                 // Skip if the pattern is centered, but the current x,y is not in the center
+                // TODO: Special room layouts with a hole in the center cannot place centered patterns, eg. the boss.
                 if (centerHorizontally && x != centerX) continue;
                 if (centerVertically && y != centerY) continue;
 

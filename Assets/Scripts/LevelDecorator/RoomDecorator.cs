@@ -10,12 +10,14 @@ public class RuleAvailability
 {
     public BaseDecoratorRule Rule;
     public int MaxAvailabilityPerRoom;
+    public bool MustHave;
 
     // This constructor is used for copying the object.
     public RuleAvailability(RuleAvailability other)
     {
         Rule = other.Rule;
         MaxAvailabilityPerRoom = other.MaxAvailabilityPerRoom;
+        MustHave = other.MustHave;
     }
 }
 
@@ -86,12 +88,31 @@ public class RoomDecorator : MonoBehaviour
         int maxTries = 50;
         int currentTries = 0;
 
+        // TODO: Make max num decorations configurable.
         int maxNumDecorations = (int)(room.Area.width * room.Area.height * 0.15f);
         int numDecorationsToPlace = random.Next(maxNumDecorations);
         int currentDecorations = 0;
 
         // Copy all the rules available for the level (since we modify the array), and then filter them based on the room type.
-        List<RuleAvailability> availableRulesForRoom = CopyRuleAvailability().Where(ra => ra.Rule.RoomTypes.HasFlag(room.Type)).ToList();
+        List<RuleAvailability> availableRulesForRoom = CopyRuleAvailability()
+            .Where(ra => ra.Rule.RoomTypes.HasFlag(room.Type))
+            .Where(ra => ra.MaxAvailabilityPerRoom != 0)
+            .ToList();
+
+        // Shuffle the available rooms.
+        availableRulesForRoom = availableRulesForRoom.OrderBy(x => random.Next()).ToList();
+
+        // First place the decorations that we absolutely must have.
+        List<RuleAvailability> mustHaves = availableRulesForRoom.Where(ra => ra.MustHave).ToList();
+        foreach (RuleAvailability mustHave in mustHaves)
+        {
+            if (mustHave.Rule.CanBeApplied(levelDecorated, room))
+            {
+                mustHave.Rule.Apply(levelDecorated, room, decorationsTransform);
+            }
+            availableRulesForRoom.Remove(mustHave);
+        }
+
         while (currentDecorations < maxNumDecorations && currentTries < maxTries && availableRulesForRoom.Count > 0)
         {
             int selectedRuleIndex = random.Next(availableRulesForRoom.Count);
