@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.AI.Navigation;
+using UnityEngine.AI;
 
 public class LevelBuilder : MonoBehaviour
 {
@@ -22,7 +23,15 @@ public class LevelBuilder : MonoBehaviour
 
         // Why not make the player a property of LevelBuilder and instantiate it?
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        player.transform.position = startPosition;
+        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            player.transform.position = startPosition;
+        }
+        else
+        {
+            agent.Warp(startPosition);
+        }
     }
 
     private Vector3 LevelPositionToWorldPosition(Vector2 levelPosition)
