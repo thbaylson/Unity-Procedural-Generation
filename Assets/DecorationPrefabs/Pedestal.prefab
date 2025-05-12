@@ -61,7 +61,6 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -169,7 +168,6 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -277,7 +275,6 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -333,9 +330,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3521106407184013376}
-  - component: {fileID: 3235379616669611722}
-  - component: {fileID: 8243801613280631974}
-  - component: {fileID: 7952628375978104144}
+  - component: {fileID: 347489297027375649}
+  - component: {fileID: 6000045166344442469}
+  - component: {fileID: 1782751615573570106}
   m_Layer: 0
   m_Name: Pedestal
   m_TagString: Untagged
@@ -377,7 +374,7 @@ Transform:
   - {fileID: 8866405301430007850}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3235379616669611722
+--- !u!114 &347489297027375649
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -386,10 +383,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5338086707895399495}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 741a8bf2acf6fc543a76f07ed63019ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 2dd6e822f304ad640b6b018c8d7b00fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8243801613280631974
+--- !u!114 &6000045166344442469
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -398,7 +395,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 5338086707895399495}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60a9fe820ea2cd148b75e90e46f4fa1c, type: 3}
+  m_Script: {fileID: 11500000, guid: af02c2d5f11250047bd45b88a98de50a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameObjects:
+  - {fileID: 9022872960796676446}
+  - {fileID: 4145551907164248491}
+  probability: 0.25
+--- !u!114 &1782751615573570106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5338086707895399495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af02c2d5f11250047bd45b88a98de50a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   gameObjects:
@@ -414,22 +427,7 @@ MonoBehaviour:
   - {fileID: 8618852114528332393}
   - {fileID: 879511793285729989}
   - {fileID: 8088495758435705488}
-  probability: 0.8
---- !u!114 &7952628375978104144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5338086707895399495}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab946a648906034790849404899bb7d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameObjects:
-  - {fileID: 9022872960796676446}
-  - {fileID: 4145551907164248491}
+  probability: 0.75
 --- !u!1001 &745817219839721620
 PrefabInstance:
   m_ObjectHideFlags: 0

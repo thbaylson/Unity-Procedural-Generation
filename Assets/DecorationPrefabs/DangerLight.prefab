@@ -92,12 +92,8 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
-  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_LightUnit: 1
-  m_LuxAtDistance: 1
-  m_EnableSpotReflector: 1
 --- !u!114 &6385989942579839250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,8 +126,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1752551895872601718}
-  - component: {fileID: 1892708044637720081}
-  - component: {fileID: 3413971082842028909}
+  - component: {fileID: 5825716380512718799}
+  - component: {fileID: 1130735464407864864}
   m_Layer: 0
   m_Name: DangerLight
   m_TagString: Untagged
@@ -156,7 +152,7 @@ Transform:
   - {fileID: 1617430412584126226}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1892708044637720081
+--- !u!114 &5825716380512718799
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -165,10 +161,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7618620514465903603}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 741a8bf2acf6fc543a76f07ed63019ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 2dd6e822f304ad640b6b018c8d7b00fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3413971082842028909
+--- !u!114 &1130735464407864864
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -177,13 +173,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7618620514465903603}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60a9fe820ea2cd148b75e90e46f4fa1c, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e24d9e42faeee046b9efd7fe5dff131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   gameObjects:
   - {fileID: 8429658330515395302}
   - {fileID: 5539106224906147904}
-  probability: 0.8
 --- !u!1 &8429658330515395302
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,12 +271,8 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
-  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_LightUnit: 1
-  m_LuxAtDistance: 1
-  m_EnableSpotReflector: 1
 --- !u!114 &1385195593220566825
 MonoBehaviour:
   m_ObjectHideFlags: 0

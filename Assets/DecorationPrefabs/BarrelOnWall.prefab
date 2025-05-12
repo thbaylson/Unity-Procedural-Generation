@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3846824646036616026}
-  - component: {fileID: 3571429116424459716}
-  - component: {fileID: 542036613001595264}
+  - component: {fileID: 8514949469637657465}
+  - component: {fileID: 4172687993619398170}
   m_Layer: 0
   m_Name: BarrelOnWall
   m_TagString: Untagged
@@ -36,7 +36,7 @@ Transform:
   - {fileID: 4522021773142762204}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3571429116424459716
+--- !u!114 &8514949469637657465
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,10 +45,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1275260121246722862}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 741a8bf2acf6fc543a76f07ed63019ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 2dd6e822f304ad640b6b018c8d7b00fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &542036613001595264
+--- !u!114 &4172687993619398170
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1275260121246722862}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab946a648906034790849404899bb7d, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e24d9e42faeee046b9efd7fe5dff131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   gameObjects:
