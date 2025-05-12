@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1cc6ed72a8c93f43b820a8043ebad04, type: 3}
   m_Name: NorthWallBarrel
   m_EditorClassIdentifier: 
+  roomType: 135
   prefab: {fileID: 2695916750597999422, guid: 428c2ce6b615c8549806ac7f6f3eb3d6, type: 3}
   prefabRotation: 0
   placement:

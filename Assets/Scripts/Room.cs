@@ -20,6 +20,7 @@ public class Room
 {
     public RectInt Area { get; private set; }
     public Texture2D LayoutTexture { get; }
+    public RoomType Type { get; set; } = RoomType.Default;
     public int Connectedness => hallways.Count;
 
     private List<Hallway> hallways = new();

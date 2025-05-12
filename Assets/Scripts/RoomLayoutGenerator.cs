@@ -63,12 +63,32 @@ public class RoomLayoutGenerator : MonoBehaviour
         // Generate all rooms after the first. TODO: Condense room generating logic.
         AddRooms();
         AddHallwaysToRooms();
-        level.PlayerStartRoom = level.Rooms[random.Next(level.Rooms.Length)];
+
+        AssignRoomTypes();
 
         // TODO: This function does too much. Should move the draw logic out.
         DrawLayout();
 
         return level;
+    }
+
+    private void AssignRoomTypes()
+    {
+        // Get all of the rooms that only have one entrance/exit into the room.
+        List<Room> deadEnds = level.Rooms.Where(r => r.Connectedness == 1).ToList();
+        // We really don't want this to happen. The generation should try again if this happens.
+        if (deadEnds.Count < 2) return;
+
+        // Find the start room.
+        Room startRoom = deadEnds[random.Next(deadEnds.Count)];
+        level.PlayerStartRoom = startRoom;
+        startRoom.Type = RoomType.Start;
+        deadEnds.Remove(startRoom);
+
+        // Find the exit room. The exit room should be as far away as possible from the start room.
+        Room exitRoom = deadEnds.OrderByDescending(r => Vector2.Distance(startRoom.Area.center, r.Area.center)).FirstOrDefault();
+        exitRoom.Type = RoomType.Exit;
+        deadEnds.Remove(exitRoom);
     }
 
     private void AddHallwaysToRooms()
@@ -158,7 +178,7 @@ public class RoomLayoutGenerator : MonoBehaviour
 
             if (_enableDebuggingInfo)
             {
-                Debug.Log($"Area: {room.Area}. Connectedness: {room.Connectedness}.");
+                Debug.Log($"Type: {room.Type}. Area: {room.Area}. Connectedness: {room.Connectedness}.");
             }
         }
 

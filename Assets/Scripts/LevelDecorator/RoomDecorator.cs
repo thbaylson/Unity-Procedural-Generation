@@ -89,7 +89,9 @@ public class RoomDecorator : MonoBehaviour
         int maxNumDecorations = (int)(room.Area.width * room.Area.height * 0.15f);
         int numDecorationsToPlace = random.Next(maxNumDecorations);
         int currentDecorations = 0;
-        List<RuleAvailability> availableRulesForRoom = CopyRuleAvailability();
+
+        // Copy all the rules available for the level (since we modify the array), and then filter them based on the room type.
+        List<RuleAvailability> availableRulesForRoom = CopyRuleAvailability().Where(ra => ra.Rule.RoomTypes.HasFlag(room.Type)).ToList();
         while (currentDecorations < maxNumDecorations && currentTries < maxTries && availableRulesForRoom.Count > 0)
         {
             int selectedRuleIndex = random.Next(availableRulesForRoom.Count);
