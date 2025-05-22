@@ -34,7 +34,7 @@ public class RoomDecorator : MonoBehaviour
     [ContextMenu("Place Items")]
     public void PlaceItemsFromMenu()
     {
-        SharedLevelData.Instance.ResetRandom();
+        random = SharedLevelData.Instance.Rand;
         Level level = roomLayoutGenerator.GenerateLevel();
         PlaceItems(level);
     }
@@ -73,7 +73,7 @@ public class RoomDecorator : MonoBehaviour
                 {
                     levelDecorated[x, y] = TileType.Wall;
                 }
-                else
+                else if (pixelColor == Color.white)
                 {
                     levelDecorated[x, y] = TileType.Floor;
                 }

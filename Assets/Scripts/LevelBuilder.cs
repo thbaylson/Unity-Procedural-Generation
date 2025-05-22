@@ -5,16 +5,26 @@ public class LevelBuilder : MonoBehaviour
 {
     [SerializeField] RoomLayoutGenerator roomLayoutGenerator;
     [SerializeField] MarchingSquares levelGeometryGenerator;
+    [SerializeField] CellularAutomataCaves levelCaves;
     [SerializeField] NavMeshSurface navMeshSurface;
     [SerializeField] RoomDecorator roomDecorator;
 
     [ContextMenu("Gen Level And Geometry")]
     public void GenerateLayoutAndGeometry()
     {
+        // Add base room layout.
         roomLayoutGenerator.GenerateNewSeed();
         Level level = roomLayoutGenerator.GenerateLevel();
+
+        // Add caves.
+        levelCaves.GenerateLevel(roomLayoutGenerator.GetLevelTexture());
+        LevelMerger.MergeLevelsByTextures(roomLayoutGenerator.GetLevelTexture(), levelCaves.GetLevelTexture());
+
+        // Add decorations.
         levelGeometryGenerator.CreateLevelGeometry();
         roomDecorator.PlaceItems(level);
+        
+        // Add nav mesh.
         navMeshSurface.BuildNavMesh();
 
         Room startRoom = level.PlayerStartRoom;

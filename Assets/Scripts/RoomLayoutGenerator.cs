@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Random = System.Random;
 using UnityEngine;
-using Unity.VisualScripting;
 
 public class RoomLayoutGenerator : MonoBehaviour
 {
@@ -19,7 +18,6 @@ public class RoomLayoutGenerator : MonoBehaviour
     Random random;
     Level level;
     Dictionary<RoomTemplate, int> availableRooms;
-
 
     [ContextMenu("Generate New Seed")]
     public void GenerateNewSeed()
@@ -171,10 +169,7 @@ public class RoomLayoutGenerator : MonoBehaviour
     /// <param name="roomCandidateRect">The rectangle that will be drawn in the level layout.</param>
     private void DrawLayout()
     {
-        var renderer = levelLayoutDisplay.GetComponent<Renderer>();
-
-        // This will allow us to change the texture from the editor. But this is usually not recommended.
-        var layoutTexture = (Texture2D)renderer.sharedMaterial.mainTexture;
+        Texture2D layoutTexture = GetLevelTexture();
 
         // We must do this if the width and height has changed since the last time we generated a texture.
         layoutTexture.Reinitialize(level.Width, level.Length);
@@ -218,6 +213,15 @@ public class RoomLayoutGenerator : MonoBehaviour
         }
 
         layoutTexture.SaveAsset();
+    }
+
+    public Texture2D GetLevelTexture()
+    {
+        var renderer = levelLayoutDisplay.GetComponent<Renderer>();
+
+        // This will allow us to change the texture from the editor. But this is usually not recommended.
+        var layoutTexture = (Texture2D)renderer.sharedMaterial.mainTexture;
+        return layoutTexture;
     }
 
     /// <summary>
