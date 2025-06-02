@@ -33,6 +33,28 @@ public class MarchingSquares : MonoBehaviour
         }
     }
 
+    public void AppendLevelGeometry(Texture2D texture)
+    {
+        int scale = SharedLevelData.Instance.Scale;
+        Vector3 scaleVector = new Vector3(scale, scale, scale);
+
+        TextureBasedLevel level = new TextureBasedLevel(texture);
+        for (int y = 0; y < level.Length - 1; y++)
+        {
+            for (int x = 0; x < level.Length - 1; x++)
+            {
+                int tileIndex = CalculateTileIndex(level, x, y);
+                GameObject prefab = tileset.GetTile(tileIndex);
+                if (prefab == null) continue;
+
+                GameObject tile = Instantiate(prefab, generatedLevel.transform);
+                tile.transform.localScale = scaleVector;
+                tile.transform.position = new Vector3(x * scale, 0f, y * scale);
+                tile.name = $"{x}, {y} - {tileIndex.ToString("00")}";
+            }
+        }
+    }
+
     private int CalculateTileIndex(ILevel level, int x, int y)
     {
         // Calculate the tile index based on the state of the four corners

@@ -5,7 +5,7 @@ using UnityEngine;
 public class LevelMerger : MonoBehaviour
 {
     // Merge level data from A onto B.
-    public static void MergeLevelsByTextures(Texture2D levelA, Texture2D levelB)
+    public static void MergeLevelsByTextures(Texture2D levelA, Texture2D levelB, Color wallColor, Color newPixelColor)
     {
         if(levelA.width != levelB.width || levelA.height != levelB.height)
         {
@@ -17,9 +17,9 @@ public class LevelMerger : MonoBehaviour
         {
             for(int y = 0; y < levelA.height; y++)
             {
-                if(levelA.GetPixel(x, y) == Color.black && levelB.GetPixel(x, y) == Color.white)
+                if(levelA.GetPixel(x, y) == wallColor && levelB.GetPixel(x, y) != wallColor)
                 {
-                    levelA.SetPixel(x, y, new Color(0.36f, 0.23f, 0.08f));//Brown - 5C3B14
+                    levelA.SetPixel(x, y, newPixelColor);
                 }
             }
         }

@@ -7,13 +7,10 @@ public enum HallwayDirection { Undefined, Top, Right, Bottom, Left };
 
 public static class  HallwayDirectionExtension
 {
-    // Unity's built in yellow has a very specific value, so let's use this for simplicity when creating new textures.
-    private static Color yellow = new Color(1f, 1f, 0f, 1f);
-
     private static readonly Dictionary<HallwayDirection, Color> DirectionToColorMap = new Dictionary<HallwayDirection, Color>
     {
         { HallwayDirection.Top, Color.blue },
-        { HallwayDirection.Left, yellow },
+        { HallwayDirection.Left, TextureBasedLevel.yellow },
         { HallwayDirection.Bottom, Color.green },
         { HallwayDirection.Right, Color.magenta }
     };

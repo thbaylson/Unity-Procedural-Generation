@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.IO;
 using UnityEditor;
+using System.Collections.Generic;
 
 public static class Texture2DExtension
 {
@@ -158,5 +159,80 @@ public static class Texture2DExtension
 
         texture.SetPixel(p0.x, p0.y, color);
         texture.Apply();
+    }
+
+    // Flood fill
+    public static void FloodFill(this Texture2D texture, Vector2Int start, Color replacementColor)
+    {
+        Color targetColor = texture.GetPixel(start.x, start.y);
+        int width = texture.width;
+        int height = texture.height;
+
+        Queue<Vector2Int> pixels = new Queue<Vector2Int>();
+        pixels.Enqueue(start);
+
+        while (pixels.Count > 0)
+        {
+            Vector2Int pixel = pixels.Dequeue();
+            if (pixel.x < 0 || pixel.x >= width || pixel.y < 0 || pixel.y >= height)
+                continue;
+
+            if (texture.GetPixel(pixel.x, pixel.y) != targetColor)
+                continue;
+
+            texture.SetPixel(pixel.x, pixel.y, replacementColor);
+
+            pixels.Enqueue(new Vector2Int(pixel.x + 1, pixel.y));
+            pixels.Enqueue(new Vector2Int(pixel.x - 1, pixel.y));
+            pixels.Enqueue(new Vector2Int(pixel.x, pixel.y + 1));
+            pixels.Enqueue(new Vector2Int(pixel.x, pixel.y - 1));
+        }
+
+        texture.Apply();
+    }
+
+    // Override to handle Vector2 start position.
+    public static void FloodFill(this Texture2D texture, Vector2 start, Color replacementColor)
+    {
+        Vector2Int startInt = new Vector2Int((int)start.x, (int)start.y);
+        FloodFill(texture, startInt, replacementColor);
+    }
+
+    // Replace one color with another in the texture.
+    public static void ReplaceColor(this Texture2D texture, Color oldColor, Color newColor)
+    {
+        Color[] pixels = texture.GetPixels();
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (pixels[i] == oldColor)
+            {
+                pixels[i] = newColor;
+            }
+        }
+        texture.SetPixels(pixels);
+        texture.Apply();
+    }
+
+    // Subtract pixels in the first texture from the second texture.
+    public static void SubtractPixels(this Texture2D textureA, Texture2D textureB, Color filledSpace, Color negativeSpace)
+    {
+        if (textureA.width != textureB.width || textureA.height != textureB.height)
+        {
+            Debug.LogError("Textures must be the same size to subtract.");
+            return;
+        }
+
+        for (int x = 0; x < textureA.width; x++)
+        {
+            for (int y = 0; y < textureA.height; y++)
+            {
+                if (textureB.GetPixel(x, y) == filledSpace)
+                {
+                    textureA.SetPixel(x, y, negativeSpace);
+                }
+            }
+        }
+
+        textureA.Apply();
     }
 }

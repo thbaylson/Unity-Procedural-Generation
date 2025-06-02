@@ -9,26 +9,54 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] NavMeshSurface navMeshSurface;
     [SerializeField] RoomDecorator roomDecorator;
 
+    [SerializeField] bool buildCaves = false;
+
     [ContextMenu("Gen Level And Geometry")]
     public void GenerateLayoutAndGeometry()
     {
         // Add base room layout.
         roomLayoutGenerator.GenerateNewSeed();
         Level level = roomLayoutGenerator.GenerateLevel();
+        Texture2D levelMapTexture = roomLayoutGenerator.GetLevelTexture();
 
-        // Add caves.
-        levelCaves.GenerateLevel(roomLayoutGenerator.GetLevelTexture());
-        LevelMerger.MergeLevelsByTextures(roomLayoutGenerator.GetLevelTexture(), levelCaves.GetLevelTexture());
+        // Find the player's start room.
+        Room startRoom = level.PlayerStartRoom;
+        Vector3 startPosition = LevelPositionToWorldPosition(startRoom.Area.center);
+
+        // Add walls and floors.
+        levelGeometryGenerator.CreateLevelGeometry();
+
+        // Add caves?
+        if (buildCaves)
+        {
+            // Add caves.
+            levelCaves.AppendCavesToLevel(levelMapTexture, Color.white);
+            Texture2D caveMapTexture = levelCaves.GetLevelTexture();
+
+            LevelMerger.MergeLevelsByTextures(caveMapTexture, levelMapTexture, Color.black, TextureBasedLevel.brown);
+
+            // Flood fill the cave map starting from the player start room.
+            caveMapTexture.FloodFill(startRoom.Area.center, Color.cyan);
+
+            // Remove white sections from cave map.
+            caveMapTexture.ReplaceColor(Color.white, Color.black);
+            caveMapTexture.ConvertToBlackAndWhite();
+
+            // Subtract the layout map from the cave map.
+            caveMapTexture.SubtractPixels(levelMapTexture, Color.white, Color.black);
+
+            // Add cave walls.
+            levelGeometryGenerator.AppendLevelGeometry(caveMapTexture);
+
+            // Add cave data to level map.
+            LevelMerger.MergeLevelsByTextures(levelMapTexture, caveMapTexture, Color.black, TextureBasedLevel.brown);
+        }
 
         // Add decorations.
-        levelGeometryGenerator.CreateLevelGeometry();
         roomDecorator.PlaceItems(level);
         
         // Add nav mesh.
         navMeshSurface.BuildNavMesh();
-
-        Room startRoom = level.PlayerStartRoom;
-        Vector3 startPosition = LevelPositionToWorldPosition(startRoom.Area.center);
 
         // Why not make the player a property of LevelBuilder and instantiate it?
         GameObject player = GameObject.FindGameObjectWithTag("Player");

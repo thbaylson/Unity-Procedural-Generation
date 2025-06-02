@@ -5,19 +5,18 @@ using Random = System.Random;
 
 public class CellularAutomataCaves : MonoBehaviour
 {
-    //[Header("Level Layout Settings")]
     //[SerializeField] RoomLevelLayoutConfig levelConfig;
     [SerializeField] private int levelWidth = 64;
     [SerializeField] private int levelLength = 64;
     [SerializeField] private int upperBoundNeighbors = 4;
     [SerializeField] private int lowerBoundNeighbors = 3;
     [SerializeField] private int iterations = 5;
+    [SerializeField] private int borderSize = 3;
 
     [Header("Level Layout Display")]
     [SerializeField] GameObject levelLayoutDisplay;
 
     private Random random;
-    private int[,] level;
 
     [ContextMenu("Generate New Seed")]
     public void GenerateNewSeed()
@@ -31,58 +30,99 @@ public class CellularAutomataCaves : MonoBehaviour
         SharedLevelData.Instance.ResetRandom();
         random = SharedLevelData.Instance.Rand;
 
-        level = new int[levelWidth, levelLength];
-        GetNoiseyArray();
+        int borderlessWidth = levelWidth - borderSize * 2;
+        int borderlessLength = levelLength - borderSize * 2;
+
+        int[,] borderlessLevel = new int[borderlessWidth, borderlessLength];
+        GetNoiseyArray(borderlessLevel);
 
         for (int i = 0; i < iterations; i++)
         {
-            Iterate();
+            borderlessLevel = Iterate(borderlessLevel);
         }
 
-        DrawLayout();
-    }
-
-    public void GenerateLevel(Texture2D texture)
-    {
-        SharedLevelData.Instance.ResetRandom();
-        random = SharedLevelData.Instance.Rand;
-
-        if(texture.width != levelWidth || texture.height != levelLength)
-        {
-            Debug.LogError("Texture must be the same size as the level.");
-            return;
-        }
-
-        level = new int[levelWidth, levelLength];
-        GetNoiseyArray();
+        // Add border to the level.
+        int[,] borderedLevel = new int[levelWidth, levelLength];
         for (int x = 0; x < levelWidth; x++)
         {
             for (int y = 0; y < levelLength; y++)
             {
-                Color color = texture.GetPixel(x, y);
-                if(color == Color.white)
+                if (x < borderSize || x >= levelWidth - borderSize || y < borderSize || y >= levelLength - borderSize)
                 {
-                    level[x, y] = 1;
+                    borderedLevel[x, y] = 0;
+                }
+                else
+                {
+                    borderedLevel[x, y] = borderlessLevel[x - borderSize, y - borderSize];
                 }
             }
         }
 
-        for (int i = 0; i < iterations; i++)
-        {
-            Iterate();
-        }
-
-        DrawLayout();
+        DrawLayout(borderedLevel);
     }
 
-    private void Iterate()
+    public void AppendCavesToLevel(Texture2D texture, Color floorColor)
     {
-        int[,] newLevel = new int[levelWidth, levelLength];
+        levelWidth = texture.width;
+        levelLength = texture.height;
+
+        SharedLevelData.Instance.ResetRandom();
+        random = SharedLevelData.Instance.Rand;
+
+        int borderlessWidth = levelWidth - borderSize * 2;
+        int borderlessLength = levelLength - borderSize * 2;
+
+        int[,] borderlessLevel = new int[borderlessWidth, borderlessLength];
+        GetNoiseyArray(borderlessLevel);
+
+        for (int i = 0; i < iterations; i++)
+        {
+            borderlessLevel = Iterate(borderlessLevel);
+        }
+
+        // Copy walkable areas from the texture into the level array.
+        for (int x = 0; x < borderlessWidth; x++)
+        {
+            for (int y = 0; y < borderlessLength; y++)
+            {
+                Color color = texture.GetPixel(x + borderSize, y + borderSize);
+                if(color == floorColor)
+                {
+                    borderlessLevel[x, y] = 1;
+                }
+            }
+        }
+
+        // Add border to the level.
+        int[,] borderedLevel = new int[levelWidth, levelLength];
         for (int x = 0; x < levelWidth; x++)
         {
             for (int y = 0; y < levelLength; y++)
             {
-                int neighbors = CountNeighbors(x, y);
+                if (x < borderSize || x >= levelWidth - borderSize || y < borderSize || y >= levelLength - borderSize)
+                {
+                    borderedLevel[x, y] = 0;
+                }
+                else
+                {
+                    borderedLevel[x, y] = borderlessLevel[x - borderSize, y - borderSize];
+                }
+            }
+        }
+
+        DrawLayout(borderedLevel);
+    }
+
+    private int[,] Iterate(int[,] levelArray)
+    {
+        int width = levelArray.GetLength(0);
+        int length = levelArray.GetLength(1);
+        int[,] newLevel = new int[width, length];
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < length; y++)
+            {
+                int neighbors = CountNeighbors(levelArray, x, y);
                 if (neighbors > upperBoundNeighbors)
                 {
                     newLevel[x, y] = 1;
@@ -93,26 +133,32 @@ public class CellularAutomataCaves : MonoBehaviour
                 }
                 else
                 {
-                    newLevel[x, y] = level[x, y];
+                    newLevel[x, y] = levelArray[x, y];
                 }
             }
         }
-        level = newLevel;
+
+        return newLevel;
     }
 
-    private void GetNoiseyArray()
+    private void GetNoiseyArray(int[,] levelArray)
     {
-        for (int x = 0; x < levelWidth; x++)
+        int width = levelArray.GetLength(0);
+        int length = levelArray.GetLength(1);
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < levelLength; y++)
+            for (int y = 0; y < length; y++)
             {
-                level[x, y] = random.Next(0, 2);
+                levelArray[x, y] = random.Next(0, 2);
             }
         }
     }
 
-    private int CountNeighbors(int x, int y)
+    private int CountNeighbors(int[,] levelArray, int x, int y)
     {
+        int width = levelArray.GetLength(0);
+        int length = levelArray.GetLength(1);
+
         int count = 0;
         for(int xOffset = -1; xOffset <= 1; xOffset++)
         {
@@ -123,9 +169,9 @@ public class CellularAutomataCaves : MonoBehaviour
                 int newX = x + xOffset;
                 int newY = y + yOffset;
 
-                if (newX < 0 || newX >= levelWidth || newY < 0 || newY >= levelLength) continue;
+                if (newX < 0 || newX >= width || newY < 0 || newY >= length) continue;
 
-                if (level[newX, newY] == 1)
+                if (levelArray[newX, newY] == 1)
                 {
                     count++;
                 }
@@ -151,21 +197,22 @@ public class CellularAutomataCaves : MonoBehaviour
         return layoutTexture;
     }
 
-    private void DrawLayout()
+    private void DrawLayout(int[,] levelArray)
     {
-        Texture2D layoutTexture = GetLevelTexture();
+        int width = levelArray.GetLength(0);
+        int length = levelArray.GetLength(1);
 
-        layoutTexture.Reinitialize(levelWidth, levelLength);
-        for (int x = 0; x < levelWidth; x++)
+        Texture2D layoutTexture = GetLevelTexture();
+        layoutTexture.Reinitialize(width, length);
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < levelLength; y++)
+            for (int y = 0; y < length; y++)
             {
-                Color color = level[x, y] == 0 ? Color.black : Color.white;
+                Color color = levelArray[x, y] == 0 ? Color.black : Color.white;
                 layoutTexture.SetPixel(x, y, color);
             }
         }
 
-        layoutTexture.ConvertToBlackAndWhite();
         layoutTexture.SaveAsset();
     }
 }

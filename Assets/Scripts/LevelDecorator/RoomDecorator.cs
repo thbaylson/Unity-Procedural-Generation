@@ -39,6 +39,16 @@ public class RoomDecorator : MonoBehaviour
         PlaceItems(level);
     }
 
+    [ContextMenu("Clear Decorations")]
+    public void ClearDecorations()
+    {
+        Transform decorationsTransform = parent.transform.Find("Decorations");
+        if (decorationsTransform != null)
+        {
+            decorationsTransform.DestroyAllChildren();
+        }
+    }
+
     public void PlaceItems(Level level)
     {
         random = SharedLevelData.Instance.Rand;
