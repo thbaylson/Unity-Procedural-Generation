@@ -24,6 +24,7 @@ public class CellularAutomataCaves : MonoBehaviour
         SharedLevelData.Instance.GenerateSeed();
     }
 
+    // TODO: Find a way to condense this and AppendCavesToLevel.
     [ContextMenu("Generate Level Layout")]
     public void GenerateLevel()
     {
@@ -79,6 +80,8 @@ public class CellularAutomataCaves : MonoBehaviour
         {
             borderlessLevel = Iterate(borderlessLevel);
         }
+
+        // TODO: Remove regions smaller than a certain size.
 
         // Copy walkable areas from the texture into the level array.
         for (int x = 0; x < borderlessWidth; x++)
