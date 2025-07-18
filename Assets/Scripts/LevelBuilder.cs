@@ -45,6 +45,8 @@ public class LevelBuilder : MonoBehaviour
             // Subtract the layout map from the cave map.
             caveMapTexture.SubtractPixels(levelMapTexture, Color.white, Color.black);
 
+            caveMapTexture.RemoveSmallRegions(Color.white, levelCaves.MinRegionSize);
+
             // Add cave walls.
             levelGeometryGenerator.AppendLevelGeometry(caveMapTexture);
 

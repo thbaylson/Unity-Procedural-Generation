@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace ProceduralGeneration
+{
 [CreateAssetMenu(fileName = "Tileset", menuName = "ScriptableObjects/Procedural Generation/Tileset", order = 1)]
-public class Tileset : ScriptableObject// TODO: Wrap this into a namespace?
+public class Tileset : ScriptableObject
 {
     [SerializeField] Color wallColor;
     [SerializeField] TileVariant[] tiles = new TileVariant[16];
@@ -16,4 +18,5 @@ public class Tileset : ScriptableObject// TODO: Wrap this into a namespace?
 
         return tiles[tileIndex].GetRandomTile();
     }
+}
 }

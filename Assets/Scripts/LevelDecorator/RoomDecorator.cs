@@ -28,6 +28,7 @@ public class RoomDecorator : MonoBehaviour
     [SerializeField] RuleAvailability[] availableRules;
     [SerializeField] Texture2D levelTexture;
     [SerializeField] Texture2D decoratedTexture;
+    [SerializeField, Range(0f, 1f)] float decorationDensity = 0.15f;
 
     private Random random;
 
@@ -98,9 +99,7 @@ public class RoomDecorator : MonoBehaviour
         int maxTries = 50;
         int currentTries = 0;
 
-        // TODO: Make max num decorations configurable.
-        int maxNumDecorations = (int)(room.Area.width * room.Area.height * 0.15f);
-        int numDecorationsToPlace = random.Next(maxNumDecorations);
+        int maxNumDecorations = (int)(room.Area.width * room.Area.height * decorationDensity);
         int currentDecorations = 0;
 
         // Copy all the rules available for the level (since we modify the array), and then filter them based on the room type.
