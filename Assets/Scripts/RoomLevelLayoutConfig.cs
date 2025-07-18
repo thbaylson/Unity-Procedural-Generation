@@ -15,6 +15,7 @@ public class RoomLevelLayoutConfig : ScriptableObject
     [Header("Room Settings")]
     [SerializeField] int roomCountMin = 3;
     [SerializeField] int roomCountMax = 5;
+    [SerializeField] int maxTreasureRooms = 3;
     [SerializeField] RoomTemplate[] roomTemplates;
     [SerializeField] int doorwayDistanceFromCorner = 1;
 
@@ -28,6 +29,7 @@ public class RoomLevelLayoutConfig : ScriptableObject
     public int RoomMargin { get => roomMargin; }
     public int RoomCountMin { get => roomCountMin; }
     public int RoomCountMax { get => roomCountMax; }
+    public int MaxTreasureRooms { get => maxTreasureRooms; }
     public RoomTemplate[] RoomTemplates { get => roomTemplates; }
     public int DoorwayDistanceFromCorner { get => doorwayDistanceFromCorner; }
     public int HallwayWidthMin { get => hallwayWidthMin; }

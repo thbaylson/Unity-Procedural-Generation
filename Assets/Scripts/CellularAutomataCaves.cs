@@ -12,6 +12,8 @@ public class CellularAutomataCaves : MonoBehaviour
     [SerializeField] private int lowerBoundNeighbors = 3;
     [SerializeField] private int iterations = 5;
     [SerializeField] private int borderSize = 3;
+    [SerializeField] private int minRegionSize = 4;
+    public int MinRegionSize => minRegionSize;
 
     [Header("Level Layout Display")]
     [SerializeField] GameObject levelLayoutDisplay;
@@ -81,7 +83,7 @@ public class CellularAutomataCaves : MonoBehaviour
             borderlessLevel = Iterate(borderlessLevel);
         }
 
-        // TODO: Remove regions smaller than a certain size.
+        RemoveSmallRegions(borderlessLevel, minRegionSize);
 
         // Copy walkable areas from the texture into the level array.
         for (int x = 0; x < borderlessWidth; x++)
@@ -153,6 +155,55 @@ public class CellularAutomataCaves : MonoBehaviour
             for (int y = 0; y < length; y++)
             {
                 levelArray[x, y] = random.Next(0, 2);
+            }
+        }
+    }
+
+    private void RemoveSmallRegions(int[,] levelArray, int minSize)
+    {
+        int width = levelArray.GetLength(0);
+        int length = levelArray.GetLength(1);
+        bool[,] visited = new bool[width, length];
+        int[] dx = { 1, -1, 0, 0 };
+        int[] dy = { 0, 0, 1, -1 };
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < length; y++)
+            {
+                if (levelArray[x, y] == 1 && !visited[x, y])
+                {
+                    List<Vector2Int> region = new();
+                    Queue<Vector2Int> queue = new();
+                    queue.Enqueue(new Vector2Int(x, y));
+                    visited[x, y] = true;
+
+                    while (queue.Count > 0)
+                    {
+                        Vector2Int pos = queue.Dequeue();
+                        region.Add(pos);
+                        for (int dir = 0; dir < 4; dir++)
+                        {
+                            int nx = pos.x + dx[dir];
+                            int ny = pos.y + dy[dir];
+                            if (nx < 0 || nx >= width || ny < 0 || ny >= length) continue;
+                            if (visited[nx, ny]) continue;
+                            if (levelArray[nx, ny] == 1)
+                            {
+                                visited[nx, ny] = true;
+                                queue.Enqueue(new Vector2Int(nx, ny));
+                            }
+                        }
+                    }
+
+                    if (region.Count < minSize)
+                    {
+                        foreach (Vector2Int cell in region)
+                        {
+                            levelArray[cell.x, cell.y] = 0;
+                        }
+                    }
+                }
             }
         }
     }

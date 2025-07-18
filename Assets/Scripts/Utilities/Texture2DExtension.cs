@@ -235,4 +235,55 @@ public static class Texture2DExtension
 
         textureA.Apply();
     }
+
+    public static void RemoveSmallRegions(this Texture2D texture, Color regionColor, int minSize)
+    {
+        int width = texture.width;
+        int height = texture.height;
+        bool[,] visited = new bool[width, height];
+        int[] dx = { 1, -1, 0, 0 };
+        int[] dy = { 0, 0, 1, -1 };
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (visited[x, y]) continue;
+                if (texture.GetPixel(x, y) != regionColor) continue;
+
+                List<Vector2Int> region = new();
+                Queue<Vector2Int> queue = new();
+                queue.Enqueue(new Vector2Int(x, y));
+                visited[x, y] = true;
+
+                while (queue.Count > 0)
+                {
+                    Vector2Int pos = queue.Dequeue();
+                    region.Add(pos);
+                    for (int dir = 0; dir < 4; dir++)
+                    {
+                        int nx = pos.x + dx[dir];
+                        int ny = pos.y + dy[dir];
+                        if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+                        if (visited[nx, ny]) continue;
+                        if (texture.GetPixel(nx, ny) == regionColor)
+                        {
+                            visited[nx, ny] = true;
+                            queue.Enqueue(new Vector2Int(nx, ny));
+                        }
+                    }
+                }
+
+                if (region.Count < minSize)
+                {
+                    foreach (Vector2Int cell in region)
+                    {
+                        texture.SetPixel(cell.x, cell.y, Color.black);
+                    }
+                }
+            }
+        }
+
+        texture.Apply();
+    }
 }
