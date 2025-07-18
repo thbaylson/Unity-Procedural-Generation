@@ -88,8 +88,8 @@ public class RoomLayoutGenerator : MonoBehaviour
         exitRoom.Type = RoomType.Exit;
         deadEnds.Remove(exitRoom);
 
-        // A level should have a max of 3 treasure rooms. TODO: Make this configurable.
-        List<Room> treasureRooms = deadEnds.OrderBy(r => random.Next()).Take(3).ToList();
+        int maxTreasureRooms = levelConfig.MaxTreasureRooms;
+        List<Room> treasureRooms = deadEnds.OrderBy(r => random.Next()).Take(maxTreasureRooms).ToList();
         deadEnds.RemoveAll(r => treasureRooms.Contains(r));
         treasureRooms.ForEach(r => r.Type = RoomType.Treasure);
 
