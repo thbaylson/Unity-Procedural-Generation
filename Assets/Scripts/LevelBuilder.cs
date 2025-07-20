@@ -10,12 +10,14 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] RoomDecorator roomDecorator;
 
     [SerializeField] bool buildCaves = false;
+    [SerializeField] bool newSeed = true;
 
     [ContextMenu("Gen Level And Geometry")]
     public void GenerateLayoutAndGeometry()
     {
+        if (newSeed) { roomLayoutGenerator.GenerateNewSeed(); }
+
         // Add base room layout.
-        roomLayoutGenerator.GenerateNewSeed();
         Level level = roomLayoutGenerator.GenerateLevel();
         Texture2D levelMapTexture = roomLayoutGenerator.GetLevelTexture();
 
