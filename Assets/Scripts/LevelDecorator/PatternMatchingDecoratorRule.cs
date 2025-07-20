@@ -52,6 +52,7 @@ public class PatternMatchingDecoratorRule : BaseDecoratorRule
         decoration.transform.eulerAngles = currentRotation + new Vector3(0f, prefabRotation, 0f);
         Vector3 center = new Vector3(occurrance.x + placement.Width / 2f, 0f, occurrance.y + placement.Height / 2f);
         int scale = SharedLevelData.Instance.Scale;
+        // Position the decoration so its center aligns with the pattern position at the current scale.
         decoration.transform.position = (center + new Vector3(-1, 0, -1)) * scale;
         decoration.transform.localScale = Vector3.one * scale;
 

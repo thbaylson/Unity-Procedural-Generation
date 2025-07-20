@@ -35,7 +35,8 @@ public class RoomDecorator : MonoBehaviour
     [ContextMenu("Place Items")]
     public void PlaceItemsFromMenu()
     {
-        random = SharedLevelData.Instance.Rand;
+        // Start the RNG from the same seed each time decorations are regenerated.
+        SharedLevelData.Instance.ResetRandom();
         Level level = roomLayoutGenerator.GenerateLevel();
         PlaceItems(level);
     }
@@ -52,6 +53,8 @@ public class RoomDecorator : MonoBehaviour
 
     public void PlaceItems(Level level)
     {
+        // Reset ensures deterministic decoration regardless of prior RNG usage.
+        SharedLevelData.Instance.ResetRandom();
         random = SharedLevelData.Instance.Rand;
         Transform decorationsTransform = parent.transform.Find("Decorations");
         if (decorationsTransform == null)
@@ -99,6 +102,7 @@ public class RoomDecorator : MonoBehaviour
         int maxTries = 50;
         int currentTries = 0;
 
+        // Determine how many props can appear in this room based on its area.
         int maxNumDecorations = (int)(room.Area.width * room.Area.height * decorationDensity);
         int currentDecorations = 0;
 
