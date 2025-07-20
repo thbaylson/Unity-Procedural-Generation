@@ -20,6 +20,8 @@ public class XorDecoratorRule : BaseDecoratorRule
 
     internal override bool CanBeApplied(TileType[,] levelDecorated, Room room)
     {
+        availableRules.Clear();
+
         foreach (BaseDecoratorRule rule in childRules)
         {
             if (rule.CanBeApplied(levelDecorated, room))
