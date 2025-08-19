@@ -77,6 +77,10 @@ public class LevelBuilder : MonoBehaviour
                     levelMapTexture.SetPixel(pos.x, pos.y, c);
                 }
             }
+            foreach (var door in graph.Doors)
+            {
+                levelMapTexture.SetPixel(door.Position.x, door.Position.y, Color.white);
+            }
             levelMapTexture.SaveAsset();
         }
 
