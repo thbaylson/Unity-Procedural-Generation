@@ -96,76 +96,36 @@ public static class RoomGraphUtility
         // Map doors to room pairs.
         foreach (var door in doors)
         {
-            HashSet<int> adjacent = new();
-            foreach (var dir in Directions)
+            bool north = !IsWall(layout.GetPixel(door.x, door.y + 1));
+            bool south = !IsWall(layout.GetPixel(door.x, door.y - 1));
+            bool east = !IsWall(layout.GetPixel(door.x + 1, door.y));
+            bool west = !IsWall(layout.GetPixel(door.x - 1, door.y));
+
+            Vector2Int stepA, stepB;
+            if (north && south)
             {
-                Vector2Int p = door + dir;
-                if (p.x < 0 || p.x >= width || p.y < 0 || p.y >= height) continue;
-                int label = labels[p.x, p.y];
-                if (label >= 0) adjacent.Add(label);
+                stepA = Vector2Int.up;
+                stepB = Vector2Int.down;
             }
-            if (adjacent.Count == 2)
+            else if (east && west)
             {
-                var enumerator = adjacent.GetEnumerator();
-                enumerator.MoveNext();
-                int a = enumerator.Current;
-                enumerator.MoveNext();
-                int b = enumerator.Current;
-                graph.Doors.Add(new DoorInfo { Position = door, RoomA = a, RoomB = b });
+                stepA = Vector2Int.right;
+                stepB = Vector2Int.left;
+            }
+            else
+            {
+                continue;
+            }
+
+            int roomA = TraceForRoom(door, stepA, labels, doors, width, height);
+            int roomB = TraceForRoom(door, stepB, labels, doors, width, height);
+            if (roomA >= 0 && roomB >= 0 && roomA != roomB)
+            {
+                graph.Doors.Add(new DoorInfo { Position = door, RoomA = roomA, RoomB = roomB });
             }
         }
 
-        AssimilateHallways(graph);
-
         return graph;
-    }
-
-    // Merge hallway rooms that loop back to a single neighbor.
-    static void AssimilateHallways(RoomGraph graph)
-    {
-        bool changed;
-        do
-        {
-            changed = false;
-            foreach (var roomId in new List<int>(graph.Rooms.Keys))
-            {
-                List<DoorInfo> connected = graph.Doors.FindAll(d => d.RoomA == roomId || d.RoomB == roomId);
-                Dictionary<int, int> neighborCounts = new();
-                foreach (var d in connected)
-                {
-                    int other = d.RoomA == roomId ? d.RoomB : d.RoomA;
-                    if (neighborCounts.TryGetValue(other, out int count)) neighborCounts[other] = count + 1;
-                    else neighborCounts[other] = 1;
-                }
-                if (neighborCounts.Count == 1)
-                {
-                    foreach (var pair in neighborCounts)
-                    {
-                        if (pair.Value > 1) // more than one door to the same room
-                        {
-                            int target = pair.Key;
-                            graph.Rooms[target].AddRange(graph.Rooms[roomId]);
-                            graph.Rooms.Remove(roomId);
-                            for (int i = graph.Doors.Count - 1; i >= 0; i--)
-                            {
-                                DoorInfo info = graph.Doors[i];
-                                if ((info.RoomA == roomId && info.RoomB == target) || (info.RoomB == roomId && info.RoomA == target))
-                                {
-                                    graph.Doors.RemoveAt(i);
-                                }
-                                else
-                                {
-                                    if (info.RoomA == roomId) { info.RoomA = target; graph.Doors[i] = info; }
-                                    if (info.RoomB == roomId) { info.RoomB = target; graph.Doors[i] = info; }
-                                }
-                            }
-                            changed = true;
-                        }
-                    }
-                }
-                if (changed) break;
-            }
-        } while (changed);
     }
 
     static bool IsWall(Color c) => c == Color.black;
@@ -197,6 +157,23 @@ public static class RoomGraphUtility
                 q.Enqueue(np);
             }
         }
+    }
+
+    // Step along the hallway direction until a labeled room or wall is found.
+    static int TraceForRoom(Vector2Int start, Vector2Int step, int[,] labels, HashSet<Vector2Int> doors, int width, int height)
+    {
+        Vector2Int p = start + step;
+        while (p.x >= 0 && p.x < width && p.y >= 0 && p.y < height)
+        {
+            if (!doors.Contains(p))
+            {
+                int label = labels[p.x, p.y];
+                if (label >= 0) return label;
+                if (label == -2) return -1;
+            }
+            p += step;
+        }
+        return -1;
     }
 
     // Very simple door detection: a single floor tile with walls on opposite sides.

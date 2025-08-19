@@ -30,6 +30,10 @@ public class LevelBuilder : MonoBehaviour
         // Add walls and floors.
         levelGeometryGenerator.CreateLevelGeometry();
 
+        RoomGraph graph = RoomGraphUtility.BuildRoomGraph(levelMapTexture);
+        Debug.Log($"Detected {graph.Rooms.Count} rooms");
+        Debug.Log($"Detected {graph.Doors.Count} doors");
+
         // Add caves?
         if (buildCaves)
         {
@@ -58,9 +62,6 @@ public class LevelBuilder : MonoBehaviour
             LevelMerger.MergeLevelsByTextures(levelMapTexture, caveMapTexture, Color.black, TextureBasedLevel.brown);
         }
 
-        RoomGraph graph = RoomGraphUtility.BuildRoomGraph(levelMapTexture);
-        Debug.Log($"Detected {graph.Rooms.Count} rooms");
-
         if (debugRooms)
         {
             Color[] palette = new Color[graph.Rooms.Count];
@@ -76,6 +77,10 @@ public class LevelBuilder : MonoBehaviour
                 {
                     levelMapTexture.SetPixel(pos.x, pos.y, c);
                 }
+            }
+            foreach(var door in graph.Doors)
+            {
+                levelMapTexture.SetPixel(door.Position.x, door.Position.y, Color.yellow);
             }
             levelMapTexture.SaveAsset();
         }
