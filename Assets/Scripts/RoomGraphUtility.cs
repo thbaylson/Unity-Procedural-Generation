@@ -1,0 +1,201 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public struct DoorInfo
+{
+    public Vector2Int Position;
+    public int RoomA;
+    public int RoomB;
+}
+
+public class RoomGraph
+{
+    public Dictionary<int, List<Vector2Int>> Rooms = new();
+    public List<DoorInfo> Doors = new();
+}
+
+public static class RoomGraphUtility
+{
+    // Directions used for flood fill.
+    static readonly Vector2Int[] Directions = new Vector2Int[]
+    {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1)
+    };
+
+    // Identify final rooms using the three phase approach described in the documentation.
+    public static RoomGraph BuildRoomGraph(Texture2D layout)
+    {
+        int width = layout.width;
+        int height = layout.height;
+        int[,] labels = new int[width, height];
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                labels[x, y] = -1;
+
+        int nextLabel = 0;
+        // Phase 1: label contiguous floor regions.
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (labels[x, y] != -1) continue;
+                if (IsWall(layout.GetPixel(x, y)))
+                {
+                    labels[x, y] = -2; // mark walls.
+                    continue;
+                }
+                FloodFill(layout, labels, new Vector2Int(x, y), nextLabel);
+                nextLabel++;
+            }
+        }
+
+        // Phase 2: find door candidates.
+        HashSet<Vector2Int> doors = FindDoorCandidates(layout);
+
+        // Phase 3: flood fill again treating doors as walls.
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                if (!IsWall(layout.GetPixel(x, y)))
+                    labels[x, y] = -1;
+
+        nextLabel = 0;
+        RoomGraph graph = new();
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (labels[x, y] != -1) continue;
+                if (doors.Contains(new Vector2Int(x, y)))
+                {
+                    labels[x, y] = -2; // treat door as wall in this phase
+                    continue;
+                }
+                FloodFill(layout, labels, new Vector2Int(x, y), nextLabel, doors);
+                nextLabel++;
+            }
+        }
+
+        // Build dictionary of room cells.
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int label = labels[x, y];
+                if (label >= 0)
+                {
+                    if (!graph.Rooms.ContainsKey(label))
+                        graph.Rooms[label] = new List<Vector2Int>();
+                    graph.Rooms[label].Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        // Map doors to room pairs.
+        foreach (var door in doors)
+        {
+            bool north = !IsWall(layout.GetPixel(door.x, door.y + 1));
+            bool south = !IsWall(layout.GetPixel(door.x, door.y - 1));
+            bool east = !IsWall(layout.GetPixel(door.x + 1, door.y));
+            bool west = !IsWall(layout.GetPixel(door.x - 1, door.y));
+
+            Vector2Int stepA, stepB;
+            if (north && south)
+            {
+                stepA = Vector2Int.up;
+                stepB = Vector2Int.down;
+            }
+            else if (east && west)
+            {
+                stepA = Vector2Int.right;
+                stepB = Vector2Int.left;
+            }
+            else
+            {
+                continue;
+            }
+
+            int roomA = TraceForRoom(door, stepA, labels, doors, width, height);
+            int roomB = TraceForRoom(door, stepB, labels, doors, width, height);
+            if (roomA >= 0 && roomB >= 0 && roomA != roomB)
+            {
+                graph.Doors.Add(new DoorInfo { Position = door, RoomA = roomA, RoomB = roomB });
+            }
+        }
+
+        return graph;
+    }
+
+    static bool IsWall(Color c) => c == Color.black;
+
+    static void FloodFill(Texture2D layout, int[,] labels, Vector2Int start, int label, HashSet<Vector2Int> treatAsWall = null)
+    {
+        Queue<Vector2Int> q = new();
+        q.Enqueue(start);
+        labels[start.x, start.y] = label;
+        while (q.Count > 0)
+        {
+            Vector2Int p = q.Dequeue();
+            foreach (var dir in Directions)
+            {
+                Vector2Int np = p + dir;
+                if (np.x < 0 || np.x >= layout.width || np.y < 0 || np.y >= layout.height) continue;
+                if (labels[np.x, np.y] != -1) continue;
+                if (treatAsWall != null && treatAsWall.Contains(np))
+                {
+                    labels[np.x, np.y] = -2;
+                    continue;
+                }
+                if (IsWall(layout.GetPixel(np.x, np.y)))
+                {
+                    labels[np.x, np.y] = -2;
+                    continue;
+                }
+                labels[np.x, np.y] = label;
+                q.Enqueue(np);
+            }
+        }
+    }
+
+    // Step along the hallway direction until a labeled room or wall is found.
+    static int TraceForRoom(Vector2Int start, Vector2Int step, int[,] labels, HashSet<Vector2Int> doors, int width, int height)
+    {
+        Vector2Int p = start + step;
+        while (p.x >= 0 && p.x < width && p.y >= 0 && p.y < height)
+        {
+            if (!doors.Contains(p))
+            {
+                int label = labels[p.x, p.y];
+                if (label >= 0) return label;
+                if (label == -2) return -1;
+            }
+            p += step;
+        }
+        return -1;
+    }
+
+    // Very simple door detection: a single floor tile with walls on opposite sides.
+    static HashSet<Vector2Int> FindDoorCandidates(Texture2D layout)
+    {
+        int width = layout.width;
+        int height = layout.height;
+        HashSet<Vector2Int> doors = new();
+        for (int y = 1; y < height - 1; y++)
+        {
+            for (int x = 1; x < width - 1; x++)
+            {
+                if (IsWall(layout.GetPixel(x, y))) continue;
+                bool north = !IsWall(layout.GetPixel(x, y + 1));
+                bool south = !IsWall(layout.GetPixel(x, y - 1));
+                bool east = !IsWall(layout.GetPixel(x + 1, y));
+                bool west = !IsWall(layout.GetPixel(x - 1, y));
+
+                if (north && south && !east && !west) doors.Add(new Vector2Int(x, y));
+                else if (east && west && !north && !south) doors.Add(new Vector2Int(x, y));
+            }
+        }
+        return doors;
+    }
+}

@@ -9,6 +9,8 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] NavMeshSurface navMeshSurface;
     [SerializeField] RoomDecorator roomDecorator;
 
+    [SerializeField] bool debugRooms = false;
+
     [SerializeField] bool buildCaves = false;
     [SerializeField] bool newSeed = true;
 
@@ -27,6 +29,10 @@ public class LevelBuilder : MonoBehaviour
 
         // Add walls and floors.
         levelGeometryGenerator.CreateLevelGeometry();
+
+        RoomGraph graph = RoomGraphUtility.BuildRoomGraph(levelMapTexture);
+        Debug.Log($"Detected {graph.Rooms.Count} rooms");
+        Debug.Log($"Detected {graph.Doors.Count} doors");
 
         // Add caves?
         if (buildCaves)
@@ -54,6 +60,29 @@ public class LevelBuilder : MonoBehaviour
 
             // Add cave data to level map.
             LevelMerger.MergeLevelsByTextures(levelMapTexture, caveMapTexture, Color.black, TextureBasedLevel.brown);
+        }
+
+        if (debugRooms)
+        {
+            Color[] palette = new Color[graph.Rooms.Count];
+            for (int i = 0; i < palette.Length; i++)
+            {
+                // Generate bright colors with random hues.
+                palette[i] = Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+            }
+            foreach (var pair in graph.Rooms)
+            {
+                Color c = palette[pair.Key % palette.Length];
+                foreach (var pos in pair.Value)
+                {
+                    levelMapTexture.SetPixel(pos.x, pos.y, c);
+                }
+            }
+            foreach(var door in graph.Doors)
+            {
+                levelMapTexture.SetPixel(door.Position.x, door.Position.y, Color.yellow);
+            }
+            levelMapTexture.SaveAsset();
         }
 
         // Add decorations.
