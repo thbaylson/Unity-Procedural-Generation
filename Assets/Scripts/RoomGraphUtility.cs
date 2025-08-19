@@ -115,7 +115,57 @@ public static class RoomGraphUtility
             }
         }
 
+        AssimilateHallways(graph);
+
         return graph;
+    }
+
+    // Merge hallway rooms that loop back to a single neighbor.
+    static void AssimilateHallways(RoomGraph graph)
+    {
+        bool changed;
+        do
+        {
+            changed = false;
+            foreach (var roomId in new List<int>(graph.Rooms.Keys))
+            {
+                List<DoorInfo> connected = graph.Doors.FindAll(d => d.RoomA == roomId || d.RoomB == roomId);
+                Dictionary<int, int> neighborCounts = new();
+                foreach (var d in connected)
+                {
+                    int other = d.RoomA == roomId ? d.RoomB : d.RoomA;
+                    if (neighborCounts.TryGetValue(other, out int count)) neighborCounts[other] = count + 1;
+                    else neighborCounts[other] = 1;
+                }
+                if (neighborCounts.Count == 1)
+                {
+                    foreach (var pair in neighborCounts)
+                    {
+                        if (pair.Value > 1) // more than one door to the same room
+                        {
+                            int target = pair.Key;
+                            graph.Rooms[target].AddRange(graph.Rooms[roomId]);
+                            graph.Rooms.Remove(roomId);
+                            for (int i = graph.Doors.Count - 1; i >= 0; i--)
+                            {
+                                DoorInfo info = graph.Doors[i];
+                                if ((info.RoomA == roomId && info.RoomB == target) || (info.RoomB == roomId && info.RoomA == target))
+                                {
+                                    graph.Doors.RemoveAt(i);
+                                }
+                                else
+                                {
+                                    if (info.RoomA == roomId) { info.RoomA = target; graph.Doors[i] = info; }
+                                    if (info.RoomB == roomId) { info.RoomB = target; graph.Doors[i] = info; }
+                                }
+                            }
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed) break;
+            }
+        } while (changed);
     }
 
     static bool IsWall(Color c) => c == Color.black;
